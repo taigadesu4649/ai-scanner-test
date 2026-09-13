@@ -3,54 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI蔵書スキャナー PoC</title>
+    <title>展示用AI蔵書スキャナー</title>
 </head>
 <body>
-    <h2>AI読み込みテスト</h2>
-    
-    <!-- スマホの実機カメラを起動するボタン -->
+    <h2>展示用スキャナー (Gemini API版)</h2>
     <input type="file" accept="image/*" capture="environment" id="cameraInput">
     <br><br>
-    
-    <button id="scanBtn" style="padding: 15px; font-size: 16px;">スキャン開始（初回AIダウンロードあり）</button>
-    
-    <div style="margin-top: 20px; font-weight: bold; color: blue;" id="status">1. 写真を撮ってからボタンを押してください</div>
+    <button id="scanBtn" style="padding: 15px; font-size: 16px;">本のタイトルをスキャン</button>
+    <div style="margin-top: 20px; font-weight: bold; color: blue;" id="status">1. 写真を撮ってボタンを押してください</div>
 
-    <!-- 最新のTransformers.js (v3) を読み込む -->
-    <script type="module">
-        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0-alpha.19';
-        
+    <script>
+        // 【重要】ここに取得したAPIキーを貼り付けます
+        const GEMINI_API_KEY = 'AQ.Ab8RN6KuO4jh6GW1xeBDk88cfyRVkSDIFlFnC3UC_lKTHeiZ9A';
+
         const statusEl = document.getElementById('status');
         const cameraInput = document.getElementById('cameraInput');
         const scanBtn = document.getElementById('scanBtn');
+
+        // 画像を送信用のデータ形式（Base64）に変換
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
 
         scanBtn.addEventListener('click', async () => {
             if (!cameraInput.files.length) {
                 statusEl.innerText = "エラー：先に写真を撮影してください";
                 return;
             }
-            
+            if (GEMINI_API_KEY.includes('ここへ')) {
+                statusEl.innerText = "エラー：コード内のAPIキーが設定されていません";
+                return;
+            }
+
             try {
-                statusEl.innerText = "AIをダウンロード中...（数分かかる場合があります。画面を閉じないでください）";
+                statusEl.innerText = "Geminiへ画像を送信中...（数秒お待ちください）";
+                const file = cameraInput.files[0];
+                const base64Image = await fileToBase64(file);
+
+                const requestBody = {
+                    contents: [{
+                        parts: [
+                            { text: "この画像に写っている本のタイトルを読み取り、タイトル名のみを出力してください。見つからない場合は「タイトル不明」と出力してください。" },
+                            { inline_data: { mime_type: file.type, data: base64Image } }
+                        ]
+                    }]
+                };
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
                 
-                // 【修正完了】不要なカッコや設定を完全に削除し、標準モードで安定起動させる
-                const generator = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning');
-                
-                statusEl.innerText = "AI準備完了！画像を解析中...";
-                
-                // 撮った画像をブラウザ用のURLに変換
-                const imageUrl = URL.createObjectURL(cameraInput.files[0]);
-                
-                // AIに画像を渡して解析
-                const output = await generator(imageUrl);
-                
-                statusEl.innerText = "成功！結果:\n" + JSON.stringify(output);
-                
-                // 次のテストのためにメモリのゴミ箱を空にする
-                URL.revokeObjectURL(imageUrl);
-                
+                if (!response.ok) throw new Error(data.error?.message || "通信エラー");
+
+                // Geminiからの返答を抽出して表示
+                const resultText = data.candidates[0].content.parts[0].text;
+                statusEl.innerText = "成功！本のタイトル:\n" + resultText;
+
             } catch (error) {
-                statusEl.innerText = "クラッシュ・エラー発生:\n" + error.message;
+                statusEl.innerText = "エラー発生:\n" + error.message;
             }
         });
     </script>
