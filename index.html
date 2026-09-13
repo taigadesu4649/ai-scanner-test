@@ -33,17 +33,15 @@
             try {
                 statusEl.innerText = "AIをダウンロード中...（数分かかる場合があります。画面を閉じないでください）";
                 
-                // 【調整ポイント】まずは絶対に落ちないであろう軽量な画像認識AI（約100MB）をWebGPUでロード
-                const generator = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning', {
-                    device: 'webgpu',  // スマホのGPUを強制使用
-                });
+                // 【修正完了】不要なカッコや設定を完全に削除し、標準モードで安定起動させる
+                const generator = await pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning');
                 
                 statusEl.innerText = "AI準備完了！画像を解析中...";
                 
                 // 撮った画像をブラウザ用のURLに変換
                 const imageUrl = URL.createObjectURL(cameraInput.files[0]);
                 
-                // AIに画像を渡して解析（ここで落ちるかどうかのチキンレース）
+                // AIに画像を渡して解析
                 const output = await generator(imageUrl);
                 
                 statusEl.innerText = "成功！結果:\n" + JSON.stringify(output);
