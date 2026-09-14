@@ -4,98 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>読書管理アプリ</title>
-    <!-- グラフ描画用ライブラリ Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; color: #333; }
         .screen { display: none; padding: 20px; padding-top: 60px; }
         .screen.active { display: block; }
         
-        /* ハンバーガーメニュー (三本線) */
         #menu-btn { position: fixed; top: 15px; right: 15px; font-size: 28px; background: none; border: none; z-index: 1000; cursor: pointer; color: #333; line-height: 1; padding: 0; }
         #side-menu { position: fixed; top: 0; right: -250px; width: 200px; height: 100%; background: white; box-shadow: -2px 0 5px rgba(0,0,0,0.1); transition: right 0.3s; z-index: 999; padding-top: 60px; }
         #side-menu.open { right: 0; }
         .menu-item { display: block; padding: 15px 20px; text-decoration: none; color: #333; border-bottom: 1px solid #eee; font-weight: bold; }
         
-        /* 共通UIパーツ */
         .box { background: white; padding: 20px; text-align: center; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; border: none; background: #e0e0e0; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; }
         .btn-primary { background: #4A90E2; color: white; }
         .btn-warning { background: #F5A623; color: white; }
+        .btn-danger { background: #E74C3C; color: white; }
         
         h1, h2 { text-align: center; font-size: 20px; margin-top: 0; color: #444; }
         .scroll-box { height: 300px; overflow-y: auto; background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: left; }
         
-        /* タブメニュー */
         .tab-container { display: flex; justify-content: space-around; margin-bottom: 15px; }
         .tab-btn { padding: 8px 15px; border: none; background: #ddd; border-radius: 20px; cursor: pointer; font-weight: bold; }
         .tab-btn.active { background: #4A90E2; color: white; }
         
-        /* 本棚のリストアイテム */
-        .book-item { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; cursor: pointer; }
+        .book-item { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .book-item:last-child { border-bottom: none; }
+        
+        /* スキャン結果の編集リスト用 */
+        .scan-result-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .scan-result-input { flex-grow: 1; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        .delete-row-btn { background: #E74C3C; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        
+        /* スライダー用 */
+        input[type=range] { width: 100%; margin: 15px 0; }
     </style>
 </head>
 <body>
 
-    <!-- ハンバーガーメニューボタン -->
     <button id="menu-btn">☰</button>
-
-    <!-- スライドメニュー -->
     <div id="side-menu">
         <a href="#" class="menu-item" onclick="nav('home')">未読本一覧</a>
         <a href="#" class="menu-item" onclick="nav('read-list')">読了本一覧</a>
         <a href="#" class="menu-item" onclick="nav('record')">読書記録</a>
     </div>
-
-    <!-- 非表示のカメラ入力 -->
     <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
 
-    <!-- 1. ホーム画面 (未読本一覧) -->
+    <!-- 1. ホーム画面 -->
     <div id="home" class="screen active">
         <h2>読書管理アプリ</h2>
-        <button class="btn btn-primary" style="width: auto; float: right; padding: 8px 20px;" id="triggerCameraBtn">追加</button>
+        <button class="btn btn-primary" style="width: auto; float: right; padding: 8px 20px;" onclick="document.getElementById('cameraInput').click()">追加</button>
         <div style="clear: both; margin-bottom: 10px;"></div>
         
-        <div class="scroll-box" id="unread-bookcase">
-            <!-- ここに未読本が追加されます -->
-            <div class="book-item" style="color: #999; text-align:center;">スキャンした本がここに表示されます</div>
-        </div>
+        <div class="scroll-box" id="unread-bookcase"></div>
         <div class="box">読んだ総ページ数: <span id="total-pages">0</span></div>
     </div>
 
-    <!-- 2. スキャン結果画面 -->
+    <!-- 2. スキャン結果画面 (複数編集可能) -->
     <div id="scan-result" class="screen">
         <h2>スキャン結果</h2>
-        <div class="box" id="scan-status" style="min-height: 150px; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+        <div class="box" id="scan-status" style="min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold;">
             画像を解析中...（数秒お待ちください）
         </div>
-        <input type="hidden" id="temp-title">
+        <div id="scan-results-container" style="margin-bottom: 20px; height: auto;"></div>
+        
         <button class="btn btn-warning" onclick="document.getElementById('cameraInput').click()">スキャンのやり直し</button>
         <button class="btn btn-primary" id="addBookBtn" disabled>本棚に追加する</button>
         <button class="btn" onclick="nav('home')">キャンセル</button>
     </div>
 
-    <!-- 3. 本の詳細（読書前/後兼用ベース） -->
+    <!-- 3. 本の詳細画面 -->
     <div id="book-detail" class="screen">
-        <div class="box" id="detail-title">本のタイトル名</div>
+        <div class="box" id="detail-title" style="font-size: 18px; font-weight: bold;"></div>
+        
         <p style="font-size: 12px; text-align: center; margin-bottom: 5px;">現在のページ数を入力してください</p>
         <input type="number" class="box" id="current-page-input" placeholder="0" style="width: 80%; display:block; margin: 0 auto 20px; font-size: 18px;">
         
-        <div class="box">タイマー設定 (実装予定)</div>
-        <button class="btn btn-primary">読書開始</button>
-        <button class="btn btn-warning">完読</button>
-        <button class="btn" onclick="nav('home')">この本を削除する</button>
+        <div class="box">
+            <label style="font-weight: bold;">タイマー設定: <span id="timerDisplay">30分</span></label>
+            <input type="range" id="timerSlider" min="1" max="120" value="30" oninput="document.getElementById('timerDisplay').innerText = this.value + '分'">
+        </div>
+        
+        <button class="btn btn-primary" onclick="startReading()">読書開始 (未実装)</button>
+        <button class="btn btn-warning" onclick="markAsRead()">完読</button>
+        <button class="btn btn-danger" onclick="deleteCurrentBook()">この本を削除する</button>
         <button class="btn" onclick="nav('home')">ホームに戻る</button>
     </div>
 
     <!-- 4. 読了本一覧画面 -->
     <div id="read-list" class="screen">
         <h2>読了本一覧</h2>
-        <div class="scroll-box">
-            <div class="book-item" style="color: #999; text-align:center;">完読した本がここに表示されます</div>
-        </div>
-        <div class="box">完読ページ数合計: 0</div>
+        <div class="scroll-box" id="read-bookcase"></div>
+        <div class="box">完読ページ数合計: <span id="read-total-pages">0</span></div>
     </div>
 
     <!-- 5. 読書記録画面 -->
@@ -112,35 +112,103 @@
     </div>
 
     <script>
-        // --- 1. アプリの基本設定 ---
         const GEMINI_API_KEY = 'AQ.Ab8RN6JPdMwq4m3swS3CmjP8dYZkEs872rz4TZvZiuEbMiRoQw';
         
-        // --- 2. 画面とメニューの制御 ---
+        // --- データ保存 (LocalStorage) ---
+        let myBooks = JSON.parse(localStorage.getItem('myBooks')) || [];
+        let currentBookIndex = -1;
+
+        function saveBooks() {
+            localStorage.setItem('myBooks', JSON.stringify(myBooks));
+            renderBookshelves();
+        }
+
+        // --- 画面ナビゲーション ---
         function nav(targetId) {
             document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
             document.getElementById(targetId).classList.add('active');
             document.getElementById('side-menu').classList.remove('open');
             window.scrollTo(0, 0);
             
-            // グラフ画面を開いたときにグラフを描画
-            if(targetId === 'record' && !myChart) {
-                initChart();
-            }
+            if(targetId === 'record' && !myChart) initChart();
         }
 
         document.getElementById('menu-btn').addEventListener('click', () => {
             document.getElementById('side-menu').classList.toggle('open');
         });
 
-        // --- 3. カメラ起動とGemini AIスキャン連携 ---
-        const cameraInput = document.getElementById('cameraInput');
-        const triggerBtn = document.getElementById('triggerCameraBtn');
-        const statusEl = document.getElementById('scan-status');
-        const addBookBtn = document.getElementById('addBookBtn');
+        // --- 本棚の描画 ---
+        function renderBookshelves() {
+            const unreadContainer = document.getElementById('unread-bookcase');
+            const readContainer = document.getElementById('read-bookcase');
+            unreadContainer.innerHTML = '';
+            readContainer.innerHTML = '';
+            
+            let totalUnreadPages = 0;
+            let totalReadPages = 0;
 
-        triggerBtn.addEventListener('click', () => {
-            cameraInput.click();
-        });
+            if (myBooks.filter(b => !b.isRead).length === 0) {
+                unreadContainer.innerHTML = '<div style="color: #999; text-align:center; padding: 20px;">未読本はありません</div>';
+            }
+            if (myBooks.filter(b => b.isRead).length === 0) {
+                readContainer.innerHTML = '<div style="color: #999; text-align:center; padding: 20px;">完読した本はありません</div>';
+            }
+
+            myBooks.forEach((book, index) => {
+                const item = document.createElement('div');
+                item.className = 'book-item';
+                item.innerHTML = `<span>${book.title}</span> <span style="font-size:12px; color:#666;">${book.currentPage}P</span>`;
+                item.onclick = () => openBookDetail(index);
+
+                if (book.isRead) {
+                    readContainer.appendChild(item);
+                    totalReadPages += book.currentPage;
+                } else {
+                    unreadContainer.appendChild(item);
+                    totalUnreadPages += book.currentPage;
+                }
+            });
+
+            document.getElementById('total-pages').innerText = totalUnreadPages + totalReadPages;
+            document.getElementById('read-total-pages').innerText = totalReadPages;
+        }
+
+        function openBookDetail(index) {
+            currentBookIndex = index;
+            const book = myBooks[index];
+            document.getElementById('detail-title').innerText = book.title;
+            document.getElementById('current-page-input').value = book.currentPage || '';
+            nav('book-detail');
+        }
+
+        // --- 本の操作 (完読・削除) ---
+        function markAsRead() {
+            if (currentBookIndex > -1) {
+                const pageInput = parseInt(document.getElementById('current-page-input').value) || 0;
+                myBooks[currentBookIndex].currentPage = pageInput;
+                myBooks[currentBookIndex].isRead = true;
+                saveBooks();
+                nav('read-list');
+            }
+        }
+
+        function deleteCurrentBook() {
+            if (confirm("本当にこの本を削除しますか？")) {
+                myBooks.splice(currentBookIndex, 1);
+                saveBooks();
+                nav('home');
+            }
+        }
+        
+        function startReading() {
+            alert("タイマー開始処理は今後のステップで実装します。");
+        }
+
+        // --- AIカメラ連携 (複数対応) ---
+        const cameraInput = document.getElementById('cameraInput');
+        const statusEl = document.getElementById('scan-status');
+        const resultContainer = document.getElementById('scan-results-container');
+        const addBookBtn = document.getElementById('addBookBtn');
 
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
@@ -157,6 +225,7 @@
             nav('scan-result');
             statusEl.innerText = "画像を解析中...\n（数秒お待ちください）";
             statusEl.style.color = "#333";
+            resultContainer.innerHTML = '';
             addBookBtn.disabled = true;
 
             try {
@@ -166,7 +235,8 @@
                 const requestBody = {
                     contents: [{
                         parts: [
-                            { text: "この画像に写っている本のタイトルを読み取り、タイトル名のみを出力してください。見つからない場合は「タイトル不明」と出力してください。" },
+                            // 複数冊対応のためにプロンプトを変更
+                            { text: "この画像に写っている全ての本のタイトルを読み取り、1行に1タイトルずつ出力してください。箇条書きの記号（- や * など）は不要です。タイトル名のみを出力してください。" },
                             { inline_data: { mime_type: file.type, data: base64Image } }
                         ]
                     }]
@@ -181,10 +251,22 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error?.message || "通信エラー");
 
+                // 返答を改行で分割してリスト化
                 const resultText = data.candidates[0].content.parts[0].text.trim();
-                statusEl.innerHTML = `<span style="font-size:12px; color:#666;">読み取り成功:</span><br><span style="font-size:20px; color:#4A90E2;">${resultText}</span>`;
+                const titles = resultText.split('\n').map(t => t.replace(/^[-*・]\s*/, '').trim()).filter(t => t);
                 
-                document.getElementById('temp-title').value = resultText;
+                statusEl.innerHTML = `<span style="font-size:14px; color:#4A90E2;">${titles.length}冊検出しました。編集・削除が可能です。</span>`;
+                
+                titles.forEach(title => {
+                    const row = document.createElement('div');
+                    row.className = 'scan-result-row';
+                    row.innerHTML = `
+                        <input type="text" class="scan-result-input" value="${title}">
+                        <button class="delete-row-btn" onclick="this.parentElement.remove()">✕</button>
+                    `;
+                    resultContainer.appendChild(row);
+                });
+
                 addBookBtn.disabled = false;
 
             } catch (error) {
@@ -193,30 +275,25 @@
             }
         });
 
+        // 編集されたリストを一括で本棚に追加
         addBookBtn.addEventListener('click', () => {
-            const title = document.getElementById('temp-title').value;
-            const bookcase = document.getElementById('unread-bookcase');
-            
-            if(bookcase.innerHTML.includes('スキャンした本がここに表示されます')) {
-                bookcase.innerHTML = '';
-            }
-            
-            const newBook = document.createElement('div');
-            newBook.className = 'book-item';
-            newBook.innerText = title;
-            newBook.onclick = () => {
-                document.getElementById('detail-title').innerText = title;
-                nav('book-detail');
-            };
-            bookcase.prepend(newBook);
-            
+            const inputs = document.querySelectorAll('.scan-result-input');
+            inputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    myBooks.unshift({
+                        title: input.value.trim(),
+                        currentPage: 0,
+                        isRead: false,
+                        dateAdded: new Date().toISOString()
+                    });
+                }
+            });
+            saveBooks();
             nav('home');
         });
 
-        // --- 4. グラフ機能 (Chart.js) 初期化データのみ ---
+        // --- グラフ機能 (Chart.js) ---
         let myChart = null;
-
-        // 実際のデータを格納するための空の配列（初期値0）
         const chartData = {
             week: { labels: ['月', '火', '水', '木', '金', '土', '日'], data: [0, 0, 0, 0, 0, 0, 0] },
             month: { labels: ['第1週', '第2週', '第3週', '第4週'], data: [0, 0, 0, 0] },
@@ -242,12 +319,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: { 
-                        y: { 
-                            beginAtZero: true,
-                            suggestedMax: 100 // グラフの縦軸が潰れないように最大値の目安を設定
-                        } 
-                    }
+                    plugins: {
+                        legend: { display: false } // 【修正】謎の長方形（凡例）を非表示
+                    },
+                    scales: { y: { beginAtZero: true, suggestedMax: 100 } }
                 }
             });
         }
@@ -255,13 +330,15 @@
         function updateChart(period, btnElement) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
-
             if (myChart) {
                 myChart.data.labels = chartData[period].labels;
                 myChart.data.datasets[0].data = chartData[period].data;
                 myChart.update();
             }
         }
+
+        // 初期化実行
+        renderBookshelves();
     </script>
 </body>
 </html>
