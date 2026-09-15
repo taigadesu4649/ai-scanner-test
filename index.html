@@ -6,38 +6,126 @@
     <title>読書管理アプリ</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; color: #333; }
+        :root {
+            /* カラーパレット */
+            --bg-color: #F4F7F6;       /* アプリ全体の背景（優しいライトグレー） */
+            --card-bg: #FFFFFF;        /* 要素の背景（白） */
+            --main-green: #3CA586;     /* 読書メーター風の落ち着いたメイングリーン */
+            --accent-orange: #F39C12;  /* アクションを促すオレンジ（追加、開始など） */
+            --sub-blue: #5D9CEC;       /* タブやサブアクションのブルー */
+            --danger-red: #E74C3C;     /* 削除・終了などのレッド */
+            
+            /* テキストカラー */
+            --text-main: #2C3E50;      /* 濃いブルーグレー（真っ黒を避ける） */
+            --text-sub: #7F8C8D;       /* 補足情報のグレー */
+            --border-color: #E6EAEA;   /* 優しい区切り線 */
+        }
+
+        body { 
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+        }
+
         .screen { display: none; padding: 20px; padding-top: 60px; }
         .screen.active { display: block; }
-        
-        #menu-btn { position: fixed; top: 15px; right: 15px; font-size: 28px; background: none; border: none; z-index: 1000; cursor: pointer; color: #333; line-height: 1; padding: 0; }
-        #side-menu { position: fixed; top: 0; right: -250px; width: 200px; height: 100%; background: white; box-shadow: -2px 0 5px rgba(0,0,0,0.1); transition: right 0.3s; z-index: 999; padding-top: 60px; }
+
+        /* ヘッダー・メニュー回り */
+        #menu-btn { 
+            position: fixed; top: 15px; right: 15px; font-size: 24px; 
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            z-index: 1000; cursor: pointer; color: var(--main-green); 
+            line-height: 1; padding: 8px 12px; border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        #side-menu { 
+            position: fixed; top: 0; right: -250px; width: 220px; height: 100%; 
+            background: var(--card-bg); box-shadow: -2px 0 10px rgba(0,0,0,0.08); 
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999; padding-top: 70px; 
+        }
         #side-menu.open { right: 0; }
-        .menu-item { display: block; padding: 15px 20px; text-decoration: none; color: #333; border-bottom: 1px solid #eee; font-weight: bold; }
-        
-        .box { background: white; padding: 20px; text-align: center; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .btn { display: block; width: 100%; padding: 15px; margin-bottom: 10px; border: none; background: #e0e0e0; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        .btn-primary { background: #4A90E2; color: white; }
-        .btn-success { background: #27AE60; color: white; }
-        .btn-warning { background: #F5A623; color: white; }
-        .btn-danger { background: #E74C3C; color: white; }
-        
-        h1, h2 { text-align: center; font-size: 20px; margin-top: 0; color: #444; }
-        .scroll-box { height: 300px; overflow-y: auto; background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: left; }
-        
-        .tab-container { display: flex; justify-content: space-around; margin-bottom: 15px; }
-        .tab-btn { padding: 8px 15px; border: none; background: #ddd; border-radius: 20px; cursor: pointer; font-weight: bold; }
-        .tab-btn.active { background: #4A90E2; color: white; }
-        
-        .book-item { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .menu-item { 
+            display: block; padding: 16px 24px; text-decoration: none; 
+            color: var(--text-main); border-bottom: 1px solid var(--border-color); 
+            font-weight: bold; font-size: 15px; transition: background 0.2s;
+        }
+        .menu-item:hover { background-color: var(--bg-color); color: var(--main-green); }
+
+        /* 共通カードデザイン */
+        .box, .scroll-box { 
+            background: var(--card-bg); padding: 20px; margin-bottom: 20px; 
+            border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            border: 1px solid var(--border-color);
+        }
+        .box { text-align: center; }
+        .scroll-box { height: 320px; overflow-y: auto; text-align: left; padding: 10px 20px; }
+
+        /* ボタンデザインの刷新 */
+        .btn { 
+            display: block; width: 100%; padding: 14px; margin-bottom: 12px; 
+            border: none; font-weight: bold; border-radius: 8px; cursor: pointer; 
+            font-size: 15px; transition: opacity 0.2s, transform 0.1s;
+            background: #E8ECEF; color: var(--text-main); /* デフォルトボタン */
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--main-green); color: white; }
+        .btn-warning { background: var(--accent-orange); color: white; }
+        .btn-success { background: var(--sub-blue); color: white; }
+        .btn-danger { background: var(--danger-red); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        h1, h2 { text-align: center; font-size: 22px; margin-top: 0; color: var(--text-main); margin-bottom: 24px; }
+
+        /* タブ（読書記録グラフ上部） */
+        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { 
+            padding: 8px 20px; border: 1px solid var(--border-color); 
+            background: var(--card-bg); color: var(--text-sub);
+            border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 13px;
+            transition: all 0.2s;
+        }
+        .tab-btn.active { background: var(--sub-blue); color: white; border-color: var(--sub-blue); }
+
+        /* 本のリスト */
+        .book-item { 
+            padding: 16px 0; border-bottom: 1px solid var(--border-color); 
+            font-weight: bold; cursor: pointer; display: flex; 
+            justify-content: space-between; align-items: center; color: var(--text-main);
+        }
         .book-item:last-child { border-bottom: none; }
-        
-        .scan-result-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .scan-result-input { flex-grow: 1; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        .delete-row-btn { background: #E74C3C; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        
-        input[type=range] { width: 100%; margin: 15px 0; }
-        #countdownDisplay { font-size: 32px; font-weight: bold; color: #E74C3C; font-family: monospace; margin-left: 15px; }
+        .book-item span:first-child { font-size: 15px; } /* タイトル */
+        .book-item span:last-child { 
+            font-size: 13px !important; color: var(--text-sub) !important; 
+            background: var(--bg-color); padding: 4px 10px; border-radius: 12px; 
+        } /* ページ数バッジ */
+
+        /* スキャン結果画面 */
+        .scan-result-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+        .scan-result-input { 
+            flex-grow: 1; padding: 12px; font-size: 15px; color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 6px; 
+            background: var(--bg-color);
+        }
+        .scan-result-input:focus { outline: none; border-color: var(--main-green); background: var(--card-bg); }
+        .delete-row-btn { 
+            background: #FFECEC; color: var(--danger-red); border: 1px solid #FFD6D6; 
+            padding: 10px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; 
+        }
+
+        /* 入力・スライダー */
+        input[type=number] {
+            padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;
+            color: var(--text-main); text-align: center;
+        }
+        input[type=number]:focus { outline: none; border-color: var(--main-green); }
+        input[type=range] { width: 100%; margin: 20px 0; accent-color: var(--main-green); }
+        #countdownDisplay { 
+            font-size: 36px; font-weight: bold; color: var(--text-main); 
+            font-family: 'Courier New', Courier, monospace; margin-left: 15px; 
+            background: var(--bg-color); padding: 8px 16px; border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -335,7 +423,7 @@
                 const data = await res.json();
                 const titles = data.candidates[0].content.parts[0].text.trim().split('\n').map(t => t.replace(/^[-*・]\s*/, '').trim()).filter(t => t);
                 
-                statusEl.innerHTML = `<span style="color:#4A90E2;">${titles.length}冊検出しました。編集・削除が可能です。</span>`;
+                statusEl.innerHTML = `<span style="color:var(--sub-blue);">${titles.length}冊検出しました。編集・削除が可能です。</span>`;
                 titles.forEach(title => {
                     document.getElementById('scan-results-container').insertAdjacentHTML('beforeend', 
                         `<div class="scan-result-row"><input type="text" class="scan-result-input" value="${title}"><button class="delete-row-btn" onclick="this.parentElement.remove()">✕</button></div>`
@@ -347,20 +435,12 @@
             }
         });
 
-        document.getElementById('addBookBtn').addEventListener('click', () => {
-            document.querySelectorAll('.scan-result-input').forEach(input => {
-                if (input.value.trim()) myBooks.unshift({ title: input.value.trim(), currentPage: 0, isRead: false });
-            });
-            saveBooks();
-            nav('home');
-        });
-
         let myChart = null;
         function initChart() {
             const ctx = document.getElementById('readingChart').getContext('2d');
             myChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ label: '読んだページ数', data: readingRecords.week, borderColor: '#2B5F8C', backgroundColor: 'rgba(43,95,140,0.1)', fill: false }] },
+                data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ label: '読んだページ数', data: readingRecords.week, borderColor: '#3CA586', backgroundColor: 'rgba(60, 165, 134, 0.1)', fill: true, tension: 0.3 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 50 } } }
             });
         }
