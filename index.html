@@ -7,19 +7,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* カラーパレット：温かみのある「ペーパー＆インク」テーマ */
-            --bg-color: #F9F6F0;       /* 背景：温かみのある紙のようなアイボリー */
-            --header-bg: #FFFFFF;      /* ヘッダー背景：真っ白（一番手前に見せる） */
-            --card-bg: #FAFAFA;        /* 要素の背景：少し落ち着いた白（ヘッダーと差をつける） */
-            --main-green: #358869;     /* メイン：少し深みのあるクラシックなブックグリーン */
-            --accent-orange: #E67E22;  /* アクセント：落ち着いたテラコッタオレンジ */
-            --sub-blue: #4A90E2;       /* サブ：爽やかなインクブルー */
-            --danger-red: #D9534F;     /* 警告：目に優しいマイルドなレッド */
-            
-            /* テキストカラー */
-            --text-main: #3E3A39;      /* 文字：活版印刷のようなスミ黒 */
-            --text-sub: #8D8985;       /* 補足：温かみのあるグレー */
-            --border-color: #EAE6E1;   /* 境界線：背景に馴染む薄いベージュ */
+            /* デフォルト（ペーパー＆インク） */
+            --bg-color: #F9F6F0;
+            --header-bg: #FFFFFF;
+            --card-bg: #FAFAFA;
+            --main-green: #358869;
+            --accent-orange: #E67E22;
+            --sub-blue: #4A90E2;
+            --danger-red: #D9534F;
+            --text-main: #3E3A39;
+            --text-sub: #8D8985;
+            --border-color: #EAE6E1;
+            --base-font-size: 15px;
         }
 
         body { 
@@ -28,6 +27,8 @@
             padding: 0; 
             background-color: var(--bg-color); 
             color: var(--text-main); 
+            font-size: var(--base-font-size);
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .screen { display: none; padding: 20px; padding-top: 10px; } 
@@ -50,11 +51,11 @@
         .menu-item { 
             display: block; padding: 16px 24px; text-decoration: none; 
             color: var(--text-main); border-bottom: 1px solid var(--border-color); 
-            font-weight: bold; font-size: 15px; transition: background 0.2s;
+            font-weight: bold; transition: background 0.2s;
         }
         .menu-item:hover { background-color: var(--bg-color); color: var(--main-green); }
 
-        /* 統一されたページヘッダー（真っ白な背景、中央揃え） */
+        /* ページヘッダー */
         .page-header {
             margin: -10px -20px 20px -20px;
             padding: 20px;
@@ -67,45 +68,20 @@
         }
         .page-header h2 {
             margin: 0;
-            font-size: 20px;
+            font-size: calc(var(--base-font-size) + 5px);
             letter-spacing: 0.5px;
             color: var(--text-main);
             text-align: center;
         }
 
-        /* 検索・並び替えコントロール */
-        .controls-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
+        /* 検索・並び替え・設定のコントロール */
+        .controls-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .custom-input, .custom-select {
+            width: 100%; padding: 14px; font-size: var(--base-font-size); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg);
+            box-sizing: border-box; transition: all 0.2s;
         }
-        .search-input, .sort-select {
-            width: 100%;
-            padding: 14px;
-            font-size: 15px;
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--card-bg);
-            box-sizing: border-box;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            transition: all 0.2s;
-        }
-        .search-input:focus, .sort-select:focus {
-            outline: none;
-            border-color: var(--main-green);
-            background: var(--header-bg);
-            box-shadow: 0 2px 8px rgba(53,136,105,0.15);
-        }
-        .sort-select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23358869%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right 15px top 50%;
-            background-size: 12px auto;
-        }
+        .custom-input:focus, .custom-select:focus { outline: none; border-color: var(--main-green); }
 
         /* 共通カードデザイン */
         .box, .scroll-box { 
@@ -116,11 +92,11 @@
         .box { text-align: center; }
         .scroll-box { height: 320px; overflow-y: auto; text-align: left; padding: 10px 20px; }
 
-        /* ボタンデザインの刷新 */
+        /* ボタンデザイン */
         .btn { 
             display: block; width: 100%; padding: 14px; margin-bottom: 12px; 
             border: none; font-weight: bold; border-radius: 8px; cursor: pointer; 
-            font-size: 15px; transition: opacity 0.2s, transform 0.1s;
+            font-size: var(--base-font-size); transition: opacity 0.2s, transform 0.1s;
             background: #EBE8E3; color: var(--text-main); 
         }
         .btn:active { transform: scale(0.98); }
@@ -130,15 +106,21 @@
         .btn-danger { background: var(--danger-red); color: white; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* タブ（読書記録グラフ上部） */
-        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { 
-            padding: 8px 20px; border: 1px solid var(--border-color); 
-            background: var(--bg-color); color: var(--text-sub);
-            border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 13px;
-            transition: all 0.2s;
+        /* ナビゲーションタイル（新ホーム画面用） */
+        .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .nav-tile {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 20px 10px; text-align: center;
+            font-weight: bold; color: var(--text-main); cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
         }
-        .tab-btn.active { background: var(--sub-blue); color: white; border-color: var(--sub-blue); }
+
+        /* 4コマ漫画プレースホルダー */
+        .comic-placeholder {
+            background: var(--card-bg); border: 2px dashed var(--border-color);
+            border-radius: 12px; padding: 40px 20px; text-align: center;
+            color: var(--text-sub); margin-bottom: 24px; font-weight: bold;
+        }
 
         /* 本のリスト */
         .book-item { 
@@ -147,145 +129,137 @@
             justify-content: space-between; align-items: center; color: var(--text-main);
         }
         .book-item:last-child { border-bottom: none; }
-        .book-item span:first-child { font-size: 15px; } /* タイトル */
-        .book-item span:last-child { 
-            font-size: 13px !important; color: var(--text-sub) !important; 
-            background: var(--bg-color); padding: 4px 10px; border-radius: 12px; 
-            border: 1px solid var(--border-color);
-        } /* ページ数バッジ */
-
-        /* スキャン結果画面 */
-        .scan-result-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
-        .scan-result-input { 
-            flex-grow: 1; padding: 12px; font-size: 15px; color: var(--text-main);
-            border: 1px solid var(--border-color); border-radius: 6px; 
-            background: var(--bg-color);
+        
+        /* グラフ回り */
+        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { 
+            padding: 8px 20px; border: 1px solid var(--border-color); 
+            background: var(--bg-color); color: var(--text-sub);
+            border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 13px;
         }
-        .scan-result-input:focus { outline: none; border-color: var(--main-green); background: var(--card-bg); }
-        .delete-row-btn { 
-            background: #FDF0F0; color: var(--danger-red); border: 1px solid #F9DADA; 
-            padding: 10px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; 
-        }
-
-        /* 入力・スライダー */
-        input[type=number] {
-            padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;
-            color: var(--text-main); text-align: center; background: var(--bg-color);
-        }
-        input[type=number]:focus { outline: none; border-color: var(--main-green); background: var(--card-bg); }
-        input[type=range] { width: 100%; margin: 20px 0; accent-color: var(--main-green); }
-        #countdownDisplay { 
-            font-size: 36px; font-weight: bold; color: var(--text-main); 
-            font-family: 'Courier New', Courier, monospace; margin-left: 15px; 
-            background: var(--bg-color); padding: 8px 16px; border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
+        .tab-btn.active { background: var(--sub-blue); color: white; border-color: var(--sub-blue); }
     </style>
 </head>
 <body>
 
     <button id="menu-btn">☰</button>
     <div id="side-menu">
-        <a href="#" class="menu-item" onclick="nav('home')">未読本一覧</a>
+        <a href="#" class="menu-item" onclick="nav('home')">ホーム</a>
+        <a href="#" class="menu-item" onclick="nav('unread')">未読本一覧</a>
         <a href="#" class="menu-item" onclick="nav('read-list')">読了本一覧</a>
         <a href="#" class="menu-item" onclick="nav('record')">読書記録</a>
+        <a href="#" class="menu-item" onclick="nav('settings')">設定</a>
     </div>
     <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
 
+    <!-- 新しいホーム画面 -->
     <div id="home" class="screen active">
-        <div class="page-header">
-            <h2>未読本一覧</h2>
+        <div class="page-header"><h2>ホーム</h2></div>
+        
+        <div class="comic-placeholder">
+            ここにアプリの使い方がわかる<br>4コマ漫画を配置します
         </div>
-        <button class="btn btn-primary" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px;" onclick="document.getElementById('cameraInput').click()">＋ 追加</button>
-        <div style="clear: both;"></div>
 
-        <!-- コントロール群（絞り込み・並び替え） -->
+        <button class="btn btn-primary" style="font-size: calc(var(--base-font-size) + 4px); padding: 20px; margin-bottom: 24px;" onclick="document.getElementById('cameraInput').click()">
+            📸 本をスキャンして追加
+        </button>
+
+        <div class="nav-grid">
+            <div class="nav-tile" onclick="nav('unread')">📖 未読本一覧</div>
+            <div class="nav-tile" onclick="nav('read-list')">📚 読了本一覧</div>
+            <div class="nav-tile" onclick="nav('record')">📊 読書記録</div>
+            <div class="nav-tile" onclick="nav('settings')">⚙️ 設定変更</div>
+        </div>
+    </div>
+
+    <!-- 未読本一覧画面 -->
+    <div id="unread" class="screen">
+        <div class="page-header"><h2>未読本一覧</h2></div>
+        
         <div class="controls-container">
-            <input type="text" id="search-unread" class="search-input" placeholder="タイトルで絞り込み..." oninput="renderBookshelves()">
-            <select id="sort-unread" class="sort-select" onchange="renderBookshelves()">
-                <option value="newest">追加日が新しい順 (新規順)</option>
-                <option value="oldest">追加日が古い順 (古い順)</option>
-                <option value="title_asc">タイトル順 (あ→ん, A→Z)</option>
-                <option value="title_desc">タイトル逆順 (ん→あ, Z→A)</option>
+            <input type="text" id="search-unread" class="custom-input" placeholder="タイトルで絞り込み..." oninput="renderBookshelves()">
+            <select id="sort-unread" class="custom-select" onchange="renderBookshelves()">
+                <option value="newest">追加日が新しい順</option>
+                <option value="oldest">追加日が古い順</option>
+                <option value="title_asc">タイトル順 (あ→ん)</option>
+                <option value="title_desc">タイトル逆順 (ん→あ)</option>
             </select>
         </div>
         
         <div class="scroll-box" id="unread-bookcase"></div>
-        <div class="box">読んだ総ページ数: <span id="total-pages">0</span></div>
+        <div class="box">未読本の総ページ数: <span id="total-pages">0</span></div>
     </div>
 
-    <div id="scan-result" class="screen">
-        <div class="page-header">
-            <h2>スキャン結果</h2>
-        </div>
-        <!-- レイアウト維持用の透明ボタン -->
-        <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px; visibility: hidden;">追加</button>
-        <div style="clear: both;"></div>
+    <!-- 設定画面 -->
+    <div id="settings" class="screen">
+        <div class="page-header"><h2>設定変更</h2></div>
         
+        <div class="box" style="text-align: left;">
+            <p style="margin-top:0; font-weight:bold;">テーマカラー</p>
+            <select id="setting-theme" class="custom-select" onchange="saveSettings()">
+                <option value="paper">ペーパー＆インク (デフォルト)</option>
+                <option value="light">クリアホワイト (明るめ)</option>
+                <option value="dark">ダークモード (夜用)</option>
+            </select>
+        </div>
+
+        <div class="box" style="text-align: left;">
+            <p style="margin-top:0; font-weight:bold;">文字の大きさ</p>
+            <select id="setting-fontsize" class="custom-select" onchange="saveSettings()">
+                <option value="13px">小さめ</option>
+                <option value="15px">標準</option>
+                <option value="18px">大きめ</option>
+            </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="nav('home')">設定を完了してホームへ</button>
+    </div>
+
+    <!-- 以下は既存の画面（スキャン結果、読書中、読了本、記録など）を省略せず記載 -->
+    <!-- スキャン結果画面 -->
+    <div id="scan-result" class="screen">
+        <div class="page-header"><h2>スキャン結果</h2></div>
         <div class="box" id="scan-status" style="min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold;"></div>
         <div id="scan-results-container" style="margin-bottom: 20px;"></div>
-        <button class="btn btn-warning" onclick="document.getElementById('cameraInput').click()">スキャンのやり直し</button>
-        <button class="btn btn-primary" id="addBookBtn" disabled>本棚に追加する</button>
+        <button class="btn btn-warning" onclick="document.getElementById('cameraInput').click()">やり直し</button>
+        <button class="btn btn-primary" id="addBookBtn" disabled>追加する</button>
         <button class="btn" onclick="nav('home')">キャンセル</button>
     </div>
 
     <div id="book-detail" class="screen">
         <div class="box" id="detail-title" style="font-size: 18px; font-weight: bold;"></div>
-        
-        <p style="font-size: 12px; text-align: center; margin-bottom: 5px;" id="page-input-label">現在のページ数を入力してください</p>
-        <input type="number" class="box" id="current-page-input" placeholder="0" style="width: 80%; display:block; margin: 0 auto 20px; font-size: 18px;">
-        
+        <p style="font-size: 12px; text-align: center; margin-bottom: 5px;" id="page-input-label">現在のページ数を入力</p>
+        <input type="number" class="box" id="current-page-input" placeholder="0" style="width: 80%; display:block; margin: 0 auto 20px;">
         <div class="box">
-            <div style="font-weight: bold; display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
-                タイマー: <span id="countdownDisplay">30:00</span>
-            </div>
+            <div style="font-weight: bold; margin-bottom: 10px;">タイマー: <span id="countdownDisplay">30:00</span></div>
             <input type="range" id="timerSlider" min="1" max="120" value="30" oninput="updateCountdownUI(this.value * 60)">
         </div>
-
         <div id="setup-section">
             <button class="btn btn-primary" onclick="startReading()">読書開始</button>
             <button class="btn btn-warning" onclick="markAsRead()">完読</button>
-            <button class="btn btn-danger" onclick="deleteCurrentBook()">この本を削除する</button>
+            <button class="btn btn-danger" onclick="deleteCurrentBook()">削除</button>
         </div>
-
         <div id="reading-section" style="display: none;">
             <button class="btn btn-success" onclick="finishReading()">読書終了</button>
         </div>
-
-        <button class="btn" onclick="nav('home')">ホームに戻る</button>
+        <button class="btn" onclick="nav('unread')">戻る</button>
     </div>
 
     <div id="read-list" class="screen">
-        <div class="page-header">
-            <h2>読了本一覧</h2>
-        </div>
-        <!-- レイアウト維持用の透明ボタン -->
-        <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px; visibility: hidden;">追加</button>
-        <div style="clear: both;"></div>
-
-        <!-- コントロール群（絞り込み・並び替え） -->
+        <div class="page-header"><h2>読了本一覧</h2></div>
         <div class="controls-container">
-            <input type="text" id="search-read" class="search-input" placeholder="タイトルで絞り込み..." oninput="renderBookshelves()">
-            <select id="sort-read" class="sort-select" onchange="renderBookshelves()">
-                <option value="newest">追加日が新しい順 (新規順)</option>
-                <option value="oldest">追加日が古い順 (古い順)</option>
-                <option value="title_asc">タイトル順 (あ→ん, A→Z)</option>
-                <option value="title_desc">タイトル逆順 (ん→あ, Z→A)</option>
+            <input type="text" id="search-read" class="custom-input" placeholder="タイトルで絞り込み..." oninput="renderBookshelves()">
+            <select id="sort-read" class="custom-select" onchange="renderBookshelves()">
+                <option value="newest">読了日が新しい順</option>
+                <option value="oldest">読了日が古い順</option>
             </select>
         </div>
-        
         <div class="scroll-box" id="read-bookcase"></div>
         <div class="box">完読ページ数合計: <span id="read-total-pages">0</span></div>
     </div>
 
     <div id="record" class="screen">
-        <div class="page-header">
-            <h2>読書記録</h2>
-        </div>
-        <!-- レイアウト維持用の透明ボタン -->
-        <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px; visibility: hidden;">追加</button>
-        <div style="clear: both;"></div>
-        
+        <div class="page-header"><h2>読書記録</h2></div>
         <div class="tab-container">
             <button class="tab-btn active" onclick="updateChart('week', this)">1週間</button>
             <button class="tab-btn" onclick="updateChart('month', this)">1ヶ月</button>
@@ -301,45 +275,52 @@
         
         let myBooks = JSON.parse(localStorage.getItem('myBooks')) || [];
         let readingRecords = JSON.parse(localStorage.getItem('readingRecords')) || {
-            week: [0, 0, 0, 0, 0, 0, 0], 
-            month: [0, 0, 0, 0],
-            year: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            week: [0,0,0,0,0,0,0], month: [0,0,0,0], year: [0,0,0,0,0,0,0,0,0,0,0,0]
         };
-        let currentBookIndex = -1;
-        let startPageRecord = 0;
-        let activeTimer = null;
+        let currentBookIndex = -1, startPageRecord = 0, activeTimer = null;
 
-        function getMondayZero(date) {
-            const d = new Date(date);
-            const day = d.getDay();
-            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-            return new Date(d.getFullYear(), d.getMonth(), diff).getTime();
+        // 設定の読み込みと適用
+        function loadSettings() {
+            const savedTheme = localStorage.getItem('appTheme') || 'paper';
+            const savedSize = localStorage.getItem('appFontSize') || '15px';
+            document.getElementById('setting-theme').value = savedTheme;
+            document.getElementById('setting-fontsize').value = savedSize;
+            applyTheme(savedTheme, savedSize);
         }
 
-        function checkAndResetRecords() {
-            const now = new Date();
-            let lastStr = localStorage.getItem('lastRecordDate');
-            if (lastStr) {
-                const lastDate = new Date(lastStr);
-                if (now.getFullYear() > lastDate.getFullYear()) {
-                    readingRecords.year = [0,0,0,0,0,0,0,0,0,0,0,0];
-                }
-                if (now.getFullYear() > lastDate.getFullYear() || now.getMonth() > lastDate.getMonth()) {
-                    readingRecords.month = [0,0,0,0];
-                }
-                if (getMondayZero(now) > getMondayZero(lastDate)) {
-                    readingRecords.week = [0,0,0,0,0,0,0];
-                }
+        function saveSettings() {
+            const theme = document.getElementById('setting-theme').value;
+            const size = document.getElementById('setting-fontsize').value;
+            localStorage.setItem('appTheme', theme);
+            localStorage.setItem('appFontSize', size);
+            applyTheme(theme, size);
+        }
+
+        function applyTheme(theme, size) {
+            document.documentElement.style.setProperty('--base-font-size', size);
+            if (theme === 'dark') {
+                document.documentElement.style.setProperty('--bg-color', '#1E1E1E');
+                document.documentElement.style.setProperty('--header-bg', '#2D2D2D');
+                document.documentElement.style.setProperty('--card-bg', '#2D2D2D');
+                document.documentElement.style.setProperty('--text-main', '#F5F5F5');
+                document.documentElement.style.setProperty('--text-sub', '#AAAAAA');
+                document.documentElement.style.setProperty('--border-color', '#444444');
+            } else if (theme === 'light') {
+                document.documentElement.style.setProperty('--bg-color', '#F0F2F5');
+                document.documentElement.style.setProperty('--header-bg', '#FFFFFF');
+                document.documentElement.style.setProperty('--card-bg', '#FFFFFF');
+                document.documentElement.style.setProperty('--text-main', '#333333');
+                document.documentElement.style.setProperty('--text-sub', '#666666');
+                document.documentElement.style.setProperty('--border-color', '#E0E0E0');
+            } else {
+                // デフォルト (ペーパー＆インク)
+                document.documentElement.style.setProperty('--bg-color', '#F9F6F0');
+                document.documentElement.style.setProperty('--header-bg', '#FFFFFF');
+                document.documentElement.style.setProperty('--card-bg', '#FAFAFA');
+                document.documentElement.style.setProperty('--text-main', '#3E3A39');
+                document.documentElement.style.setProperty('--text-sub', '#8D8985');
+                document.documentElement.style.setProperty('--border-color', '#EAE6E1');
             }
-            localStorage.setItem('lastRecordDate', now.toISOString());
-        }
-
-        checkAndResetRecords();
-
-        function saveBooks() {
-            localStorage.setItem('myBooks', JSON.stringify(myBooks));
-            localStorage.setItem('readingRecords', JSON.stringify(readingRecords));
-            renderBookshelves();
         }
 
         function nav(targetId) {
@@ -354,52 +335,41 @@
             document.getElementById('side-menu').classList.toggle('open');
         });
 
-        // 絞り込み・並び替えを適用したレンダリング
+        function saveBooks() {
+            localStorage.setItem('myBooks', JSON.stringify(myBooks));
+            localStorage.setItem('readingRecords', JSON.stringify(readingRecords));
+            renderBookshelves();
+        }
+
         function renderBookshelves() {
             const unread = document.getElementById('unread-bookcase');
             const read = document.getElementById('read-bookcase');
             unread.innerHTML = read.innerHTML = '';
             
             let totalUnread = 0, totalRead = 0;
-
-            // 検索とソートの現在の値を取得
             const searchUnread = document.getElementById('search-unread') ? document.getElementById('search-unread').value.toLowerCase() : '';
             const sortUnread = document.getElementById('sort-unread') ? document.getElementById('sort-unread').value : 'newest';
             
-            const searchRead = document.getElementById('search-read') ? document.getElementById('search-read').value.toLowerCase() : '';
-            const sortRead = document.getElementById('sort-read') ? document.getElementById('sort-read').value : 'newest';
-
-            // 並び替え・絞り込み後も正しい本を選択できるよう、元の配列のインデックスを保持
             let booksWithIndex = myBooks.map((book, index) => ({ book, originalIndex: index }));
-
             let unreadList = booksWithIndex.filter(b => !b.book.isRead);
             let readList = booksWithIndex.filter(b => b.book.isRead);
 
-            // 総ページ数は絞り込み前の全体で計算
             unreadList.forEach(b => totalUnread += b.book.currentPage);
             readList.forEach(b => totalRead += b.book.currentPage);
 
-            // 絞り込みフィルターの適用
             if (searchUnread) unreadList = unreadList.filter(b => b.book.title.toLowerCase().includes(searchUnread));
-            if (searchRead) readList = readList.filter(b => b.book.title.toLowerCase().includes(searchRead));
 
-            // 並び替え処理
-            const sortFn = (order) => (a, b) => {
-                if (order === 'newest') return a.originalIndex - b.originalIndex;
-                if (order === 'oldest') return b.originalIndex - a.originalIndex;
-                if (order === 'title_asc') return a.book.title.localeCompare(b.book.title, 'ja');
-                if (order === 'title_desc') return b.book.title.localeCompare(a.book.title, 'ja');
-                return 0;
-            };
+            unreadList.sort((a, b) => {
+                if (sortUnread === 'newest') return a.originalIndex - b.originalIndex;
+                if (sortUnread === 'oldest') return b.originalIndex - a.originalIndex;
+                if (sortUnread === 'title_asc') return a.book.title.localeCompare(b.book.title, 'ja');
+                if (sortUnread === 'title_desc') return b.book.title.localeCompare(a.book.title, 'ja');
+            });
 
-            unreadList.sort(sortFn(sortUnread));
-            readList.sort(sortFn(sortRead));
-
-            // DOMに要素を追加
             unreadList.forEach(b => {
                 const item = document.createElement('div');
                 item.className = 'book-item';
-                item.innerHTML = `<span>${b.book.title}</span> <span style="font-size:12px; color:#666;">${b.book.currentPage}P</span>`;
+                item.innerHTML = `<span>${b.book.title}</span> <span>${b.book.currentPage}P</span>`;
                 item.onclick = () => openBookDetail(b.originalIndex);
                 unread.appendChild(item);
             });
@@ -407,15 +377,15 @@
             readList.forEach(b => {
                 const item = document.createElement('div');
                 item.className = 'book-item';
-                item.innerHTML = `<span>${b.book.title}</span> <span style="font-size:12px; color:#666;">${b.book.currentPage}P</span>`;
+                item.innerHTML = `<span>${b.book.title}</span> <span>${b.book.currentPage}P</span>`;
                 item.onclick = () => openBookDetail(b.originalIndex);
                 read.appendChild(item);
             });
 
-            if(!unread.innerHTML) unread.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本が見つかりません</div>';
-            if(!read.innerHTML) read.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本が見つかりません</div>';
+            if(!unread.innerHTML) unread.innerHTML = '<div style="color:var(--text-sub);text-align:center;">本がありません</div>';
+            if(!read.innerHTML) read.innerHTML = '<div style="color:var(--text-sub);text-align:center;">本がありません</div>';
 
-            document.getElementById('total-pages').innerText = totalUnread + totalRead;
+            document.getElementById('total-pages').innerText = totalUnread;
             document.getElementById('read-total-pages').innerText = totalRead;
         }
 
@@ -429,85 +399,55 @@
             currentBookIndex = index;
             document.getElementById('detail-title').innerText = myBooks[index].title;
             document.getElementById('current-page-input').value = myBooks[index].currentPage || '';
-            
             clearInterval(activeTimer);
             document.getElementById('setup-section').style.display = 'block';
             document.getElementById('reading-section').style.display = 'none';
-            document.getElementById('page-input-label').innerText = "現在のページ数を入力してください";
-            
             document.getElementById('timerSlider').style.display = 'block';
             document.getElementById('timerSlider').value = 30;
             updateCountdownUI(30 * 60);
-            
             nav('book-detail');
         }
 
         function startReading() {
             const pageInput = document.getElementById('current-page-input');
             const timerVal = document.getElementById('timerSlider').value;
-
-            if (pageInput.value === '') {
-                alert("現在のページ数を入力してください");
-                return;
-            }
-            if (timerVal == 0) {
-                alert("タイマーを設定してください");
-                return;
-            }
-
+            if (pageInput.value === '') return alert("現在のページ数を入力してください");
+            
             startPageRecord = parseInt(pageInput.value) || 0;
             pageInput.value = ''; 
-            document.getElementById('page-input-label').innerText = "読書終了後のページ数を入力してください";
-
             document.getElementById('setup-section').style.display = 'none';
             document.getElementById('reading-section').style.display = 'block';
             document.getElementById('timerSlider').style.display = 'none'; 
 
             let remainingSeconds = parseInt(timerVal) * 60;
             updateCountdownUI(remainingSeconds);
-
             activeTimer = setInterval(() => {
                 remainingSeconds--;
                 if (remainingSeconds <= 0) {
                     clearInterval(activeTimer);
                     updateCountdownUI(0);
-                } else {
-                    updateCountdownUI(remainingSeconds);
-                }
+                } else updateCountdownUI(remainingSeconds);
             }, 1000);
         }
 
         function finishReading() {
             const pageInput = document.getElementById('current-page-input');
-            if (pageInput.value === '') {
-                alert("読書終了後のページ数を入力してください");
-                return;
-            }
-
+            if (pageInput.value === '') return alert("終了後のページ数を入力してください");
+            
             const endPage = parseInt(pageInput.value) || 0;
             const pagesRead = endPage - startPageRecord;
 
             if (pagesRead > 0) {
-                checkAndResetRecords(); 
-
                 const now = new Date();
                 const day = now.getDay();
                 const adjDay = day === 0 ? 6 : day - 1; 
                 readingRecords.week[adjDay] += pagesRead;
-
-                let weekOfMonth = Math.floor((now.getDate() - 1) / 7);
-                if (weekOfMonth > 3) weekOfMonth = 3; 
-                readingRecords.month[weekOfMonth] += pagesRead;
-
-                const currentMonth = now.getMonth(); 
-                readingRecords.year[currentMonth] += pagesRead;
             }
 
             myBooks[currentBookIndex].currentPage = endPage;
             saveBooks();
-
             clearInterval(activeTimer);
-            nav('home');
+            nav('unread');
         }
 
         function markAsRead() {
@@ -522,7 +462,7 @@
             if (confirm("本当にこの本を削除しますか？")) {
                 myBooks.splice(currentBookIndex, 1);
                 saveBooks();
-                nav('home');
+                nav('unread');
             }
         }
 
@@ -584,6 +524,8 @@
             }
         }
 
+        // 初期化
+        loadSettings();
         renderBookshelves();
     </script>
 </body>
