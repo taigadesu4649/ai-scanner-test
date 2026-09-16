@@ -106,6 +106,39 @@
         .btn-danger { background: var(--danger-red); color: white; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* ホーム画面：機能紹介カード（4コマ代わり） */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .feature-title {
+            font-weight: bold;
+            font-size: calc(var(--base-font-size) + 1px);
+            color: var(--main-green);
+            margin-bottom: 6px;
+        }
+        .feature-desc {
+            font-size: calc(var(--base-font-size) - 3px);
+            color: var(--text-sub);
+            line-height: 1.4;
+        }
+
         /* ナビゲーションタイル（新ホーム画面用） */
         .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .nav-tile {
@@ -113,13 +146,11 @@
             border-radius: 12px; padding: 20px 10px; text-align: center;
             font-weight: bold; color: var(--text-main); cursor: pointer;
             box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            transition: transform 0.1s, box-shadow 0.1s;
         }
-
-        /* 4コマ漫画プレースホルダー */
-        .comic-placeholder {
-            background: var(--card-bg); border: 2px dashed var(--border-color);
-            border-radius: 12px; padding: 40px 20px; text-align: center;
-            color: var(--text-sub); margin-bottom: 24px; font-weight: bold;
+        .nav-tile:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         /* 本のリスト */
@@ -158,14 +189,36 @@
             <h2 style="color: var(--main-green);">Tumi Yomi</h2>
         </div>
         
-        <div class="comic-placeholder">
-            ここにアプリの使い方がわかる<br>4コマ漫画を配置します
+        <!-- 絵文字を使った機能紹介カード（4コマの代わり） -->
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📸</div>
+                <div class="feature-title">一括スキャン</div>
+                <div class="feature-desc">積んだ本をカメラで撮るだけ。複数冊を自動でリストに追加します。</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <div class="feature-title">本棚を整理</div>
+                <div class="feature-desc">「未読」と「読了」を分けて管理。今の自分の読書状況がひと目でわかります。</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⏱️</div>
+                <div class="feature-title">集中タイマー</div>
+                <div class="feature-desc">時間を決めて読書スタート。スキマ時間を使って無理なく読み進められます。</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <div class="feature-title">記録を可視化</div>
+                <div class="feature-desc">読んだページ数が自動でグラフに。日々の成長を実感してモチベアップ。</div>
+            </div>
         </div>
 
-        <button class="btn btn-primary" style="font-size: calc(var(--base-font-size) + 4px); padding: 20px; margin-bottom: 24px;" onclick="document.getElementById('cameraInput').click()">
+        <!-- 特大スキャンボタン -->
+        <button class="btn btn-primary" style="font-size: calc(var(--base-font-size) + 4px); padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(53,136,105,0.3);" onclick="document.getElementById('cameraInput').click()">
             📸 本をスキャンして追加
         </button>
 
+        <!-- ページ遷移のナビゲーションタイル -->
         <div class="nav-grid">
             <div class="nav-tile" onclick="nav('unread')">📖 未読本一覧</div>
             <div class="nav-tile" onclick="nav('read-list')">📚 読了本一覧</div>
