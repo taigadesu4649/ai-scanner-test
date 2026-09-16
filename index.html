@@ -43,10 +43,11 @@
             padding-bottom: 90px;
         }
 
-        .screen { display: none; padding: 20px; padding-top: 10px; } 
+        /* 固定ヘッダーの分だけ上の余白を大きく確保 */
+        .screen { display: none; padding: 20px; padding-top: 85px; } 
         .screen.active { display: block; }
 
-        /* ボトムナビゲーション（動画のようなネイティブアプリ風） */
+        /* ボトムナビゲーション */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -55,7 +56,7 @@
             background-color: var(--header-bg);
             display: flex;
             justify-content: space-around;
-            padding: 12px 0 25px 0; /* iPhoneのホームバー考慮の余白 */
+            padding: 12px 0 25px 0; 
             box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
             border-top: 1px solid var(--border-color);
             z-index: 1000;
@@ -79,15 +80,17 @@
             font-size: 22px;
         }
 
-        /* ページヘッダー（スクロールに追従するようstickyに） */
+        /* ★ページヘッダー（常に画面上部に完全に固定して追尾） */
         .page-header {
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            width: 100%;
             z-index: 900;
-            margin: -10px -20px 20px -20px;
-            padding: 20px;
+            margin: 0;
+            padding: 20px 0;
             background-color: var(--header-bg);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
@@ -101,17 +104,38 @@
             text-align: center;
         }
 
+        /* ハンバーガーメニュー（固定ヘッダーより上に表示） */
+        #menu-btn { 
+            position: fixed; top: 15px; right: 15px; font-size: 24px; 
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            z-index: 1000; cursor: pointer; color: var(--main-green); 
+            line-height: 1; padding: 8px 12px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        }
+        #side-menu { 
+            position: fixed; top: 0; right: -250px; width: 220px; height: 100%; 
+            background: var(--card-bg); box-shadow: -2px 0 10px rgba(0,0,0,0.08); 
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999; padding-top: 70px; 
+        }
+        #side-menu.open { right: 0; }
+        .menu-item { 
+            display: block; padding: 16px 24px; text-decoration: none; 
+            color: var(--text-main); border-bottom: 1px solid var(--border-color); 
+            font-weight: bold; transition: background 0.2s;
+        }
+        .menu-item:hover { background-color: var(--bg-color); color: var(--main-green); }
+
         /* 検索・並び替えコントロール（ピル型デザイン） */
         .controls-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
         .custom-input, .custom-select {
             width: 100%; padding: 14px 20px; font-size: var(--base-font-size); color: var(--text-main);
-            border: 1px solid var(--border-color); border-radius: 50px; /* カプセル型に */
-            background: var(--header-bg); /* 白抜きにしてスッキリ */
+            border: 1px solid var(--border-color); border-radius: 50px; 
+            background: var(--header-bg); 
             box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.2s;
         }
         .custom-input:focus, .custom-select:focus { outline: none; border-color: var(--main-green); box-shadow: 0 4px 12px rgba(53,136,105,0.1); }
 
-        /* 共通カードデザイン（動画のように丸みを強調） */
+        /* 共通カードデザイン */
         .box, .scroll-box { 
             background: var(--card-bg); padding: 24px; margin-bottom: 20px; 
             border-radius: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); 
@@ -229,7 +253,7 @@
             border: 1px solid var(--border-color);
         } 
         
-        /* グラフ回り（タブもピル型に） */
+        /* グラフ回り */
         .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
         .tab-btn { 
             padding: 10px 24px; border: 1px solid var(--border-color); 
@@ -300,6 +324,16 @@
             <span class="bottom-nav-icon">⚙️</span>
             <span>設定</span>
         </div>
+    </div>
+
+    <!-- ハンバーガーメニュー -->
+    <button id="menu-btn">☰</button>
+    <div id="side-menu">
+        <a href="#" class="menu-item" onclick="nav('home')">ホーム</a>
+        <a href="#" class="menu-item" onclick="nav('unread')">未読本一覧</a>
+        <a href="#" class="menu-item" onclick="nav('read-list')">読了本一覧</a>
+        <a href="#" class="menu-item" onclick="nav('record')">読書記録</a>
+        <a href="#" class="menu-item" onclick="nav('settings')">設定</a>
     </div>
 
     <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
@@ -828,6 +862,11 @@
         // 初期化
         loadSettings();
         renderBookshelves();
+        
+        // ハンバーガーメニューのトグル
+        document.getElementById('menu-btn').addEventListener('click', () => {
+            document.getElementById('side-menu').classList.toggle('open');
+        });
     </script>
 </body>
 </html>
