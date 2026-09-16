@@ -79,7 +79,7 @@
             font-size: 22px;
         }
 
-        /* ★ページヘッダー（スクロールに追従するようstickyに） */
+        /* ページヘッダー（スクロールに追従するようstickyに） */
         .page-header {
             position: sticky;
             top: 0;
@@ -266,6 +266,14 @@
             color: var(--text-main); text-align: center; background: var(--header-bg);
         }
         input[type=number]:focus { outline: none; border-color: var(--main-green); }
+
+        /* グラフ見出し */
+        .chart-title {
+            margin: 0 0 10px 0;
+            font-size: calc(var(--base-font-size) + 1px);
+            font-weight: bold;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -445,9 +453,21 @@
             <button class="tab-btn" onclick="updateChart('month', this)">1ヶ月</button>
             <button class="tab-btn" onclick="updateChart('year', this)">1年</button>
         </div>
-        <!-- グラフの高さを30vhに調整し、内側の余白も調整 -->
-        <div class="box" style="position: relative; height: 30vh; width: 100%; padding: 15px;">
-            <canvas id="readingChart"></canvas>
+        
+        <!-- ページ数のグラフ -->
+        <div class="box" style="padding: 15px;">
+            <h3 class="chart-title" style="color: var(--main-green);">📖 読んだページ数</h3>
+            <div style="position: relative; height: 25vh; width: 100%;">
+                <canvas id="readingChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 読書時間のグラフ -->
+        <div class="box" style="padding: 15px;">
+            <h3 class="chart-title" style="color: var(--accent-orange);">⏱️ 読書時間 (分)</h3>
+            <div style="position: relative; height: 25vh; width: 100%;">
+                <canvas id="timeChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -455,10 +475,21 @@
         const GEMINI_API_KEY = 'AQ.Ab8RN6JPdMwq4m3swS3CmjP8dYZkEs872rz4TZvZiuEbMiRoQw';
         
         let myBooks = JSON.parse(localStorage.getItem('myBooks')) || [];
+        
+        // ページ数の記録
         let readingRecords = JSON.parse(localStorage.getItem('readingRecords')) || {
             week: [0,0,0,0,0,0,0], month: [0,0,0,0], year: [0,0,0,0,0,0,0,0,0,0,0,0]
         };
-        let currentBookIndex = -1, startPageRecord = 0, activeTimer = null;
+        // 読書時間（分）の記録
+        let readingTimeRecords = JSON.parse(localStorage.getItem('readingTimeRecords')) || {
+            week: [0,0,0,0,0,0,0], month: [0,0,0,0], year: [0,0,0,0,0,0,0,0,0,0,0,0]
+        };
+
+        let currentBookIndex = -1;
+        let startPageRecord = 0;
+        let activeTimer = null;
+        let initialTimerSeconds = 0;
+        let currentRemainingSeconds = 0;
 
         function loadSettings() {
             const savedTheme = localStorage.getItem('appTheme') || 'paper';
@@ -515,23 +546,60 @@
                 }
             });
 
-            if(targetId === 'record' && !myChart) initChart();
+            if(targetId === 'record') {
+                if(!myChart) initChart();
+            }
         }
+
+        // 月曜始まりの週リセット用
+        function getMondayZero(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.getFullYear(), d.getMonth(), diff).getTime();
+        }
+
+        function checkAndResetRecords() {
+            const now = new Date();
+            let lastStr = localStorage.getItem('lastRecordDate');
+            if (lastStr) {
+                const lastDate = new Date(lastStr);
+                if (now.getFullYear() > lastDate.getFullYear()) {
+                    readingRecords.year = [0,0,0,0,0,0,0,0,0,0,0,0];
+                    readingTimeRecords.year = [0,0,0,0,0,0,0,0,0,0,0,0];
+                }
+                if (now.getFullYear() > lastDate.getFullYear() || now.getMonth() > lastDate.getMonth()) {
+                    readingRecords.month = [0,0,0,0];
+                    readingTimeRecords.month = [0,0,0,0];
+                }
+                if (getMondayZero(now) > getMondayZero(lastDate)) {
+                    readingRecords.week = [0,0,0,0,0,0,0];
+                    readingTimeRecords.week = [0,0,0,0,0,0,0];
+                }
+            }
+            localStorage.setItem('lastRecordDate', now.toISOString());
+        }
+
+        checkAndResetRecords();
 
         function saveBooks() {
             localStorage.setItem('myBooks', JSON.stringify(myBooks));
             localStorage.setItem('readingRecords', JSON.stringify(readingRecords));
+            localStorage.setItem('readingTimeRecords', JSON.stringify(readingTimeRecords));
             renderBookshelves();
         }
 
         function renderBookshelves() {
             const unread = document.getElementById('unread-bookcase');
             const read = document.getElementById('read-bookcase');
-            unread.innerHTML = read.innerHTML = '';
+            if(unread) unread.innerHTML = '';
+            if(read) read.innerHTML = '';
             
             let totalUnread = 0, totalRead = 0;
             const searchUnread = document.getElementById('search-unread') ? document.getElementById('search-unread').value.toLowerCase() : '';
             const sortUnread = document.getElementById('sort-unread') ? document.getElementById('sort-unread').value : 'newest';
+            const searchRead = document.getElementById('search-read') ? document.getElementById('search-read').value.toLowerCase() : '';
+            const sortRead = document.getElementById('sort-read') ? document.getElementById('sort-read').value : 'newest';
             
             let booksWithIndex = myBooks.map((book, index) => ({ book, originalIndex: index }));
             let unreadList = booksWithIndex.filter(b => !b.book.isRead);
@@ -541,35 +609,42 @@
             readList.forEach(b => totalRead += b.book.currentPage);
 
             if (searchUnread) unreadList = unreadList.filter(b => b.book.title.toLowerCase().includes(searchUnread));
+            if (searchRead) readList = readList.filter(b => b.book.title.toLowerCase().includes(searchRead));
 
-            unreadList.sort((a, b) => {
-                if (sortUnread === 'newest') return a.originalIndex - b.originalIndex;
-                if (sortUnread === 'oldest') return b.originalIndex - a.originalIndex;
-                if (sortUnread === 'title_asc') return a.book.title.localeCompare(b.book.title, 'ja');
-                if (sortUnread === 'title_desc') return b.book.title.localeCompare(a.book.title, 'ja');
-            });
+            const sortFn = (order) => (a, b) => {
+                if (order === 'newest') return a.originalIndex - b.originalIndex;
+                if (order === 'oldest') return b.originalIndex - a.originalIndex;
+                if (order === 'title_asc') return a.book.title.localeCompare(b.book.title, 'ja');
+                if (order === 'title_desc') return b.book.title.localeCompare(a.book.title, 'ja');
+                return 0;
+            };
 
-            unreadList.forEach(b => {
-                const item = document.createElement('div');
-                item.className = 'book-item';
-                item.innerHTML = `<span>${b.book.title}</span> <span>${b.book.currentPage}P</span>`;
-                item.onclick = () => openBookDetail(b.originalIndex);
-                unread.appendChild(item);
-            });
+            unreadList.sort(sortFn(sortUnread));
+            readList.sort(sortFn(sortRead));
 
-            readList.forEach(b => {
-                const item = document.createElement('div');
-                item.className = 'book-item';
-                item.innerHTML = `<span>${b.book.title}</span> <span>${b.book.currentPage}P</span>`;
-                item.onclick = () => openBookDetail(b.originalIndex);
-                read.appendChild(item);
-            });
+            if(unread) {
+                unreadList.forEach(b => {
+                    const item = document.createElement('div');
+                    item.className = 'book-item';
+                    item.innerHTML = `<span>${b.book.title}</span> <span>${b.book.currentPage}P</span>`;
+                    item.onclick = () => openBookDetail(b.originalIndex);
+                    unread.appendChild(item);
+                });
+                if(!unread.innerHTML) unread.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本がありません</div>';
+                document.getElementById('total-pages').innerText = totalUnread;
+            }
 
-            if(!unread.innerHTML) unread.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本がありません</div>';
-            if(!read.innerHTML) read.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本がありません</div>';
-
-            document.getElementById('total-pages').innerText = totalUnread;
-            document.getElementById('read-total-pages').innerText = totalRead;
+            if(read) {
+                readList.forEach(b => {
+                    const item = document.createElement('div');
+                    item.className = 'book-item';
+                    item.innerHTML = `<span>${b.book.title}</span> <span>${b.book.currentPage}P</span>`;
+                    item.onclick = () => openBookDetail(b.originalIndex);
+                    read.appendChild(item);
+                });
+                if(!read.innerHTML) read.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本がありません</div>';
+                document.getElementById('read-total-pages').innerText = totalRead;
+            }
         }
 
         function updateCountdownUI(seconds) {
@@ -604,14 +679,19 @@
             document.getElementById('timerSlider').style.display = 'none'; 
             document.getElementById('page-input-label').innerText = "読書終了後のページ数を入力してください";
 
-            let remainingSeconds = parseInt(timerVal) * 60;
-            updateCountdownUI(remainingSeconds);
+            initialTimerSeconds = parseInt(timerVal) * 60;
+            currentRemainingSeconds = initialTimerSeconds;
+
+            updateCountdownUI(currentRemainingSeconds);
             activeTimer = setInterval(() => {
-                remainingSeconds--;
-                if (remainingSeconds <= 0) {
+                currentRemainingSeconds--;
+                if (currentRemainingSeconds <= 0) {
+                    currentRemainingSeconds = 0;
                     clearInterval(activeTimer);
                     updateCountdownUI(0);
-                } else updateCountdownUI(remainingSeconds);
+                } else {
+                    updateCountdownUI(currentRemainingSeconds);
+                }
             }, 1000);
         }
 
@@ -621,12 +701,32 @@
             
             const endPage = parseInt(pageInput.value) || 0;
             const pagesRead = endPage - startPageRecord;
+            
+            // 読んだ時間を計算（分単位に切り上げ）
+            const timeSpentSeconds = initialTimerSeconds - currentRemainingSeconds;
+            const minutesRead = timeSpentSeconds > 0 ? Math.ceil(timeSpentSeconds / 60) : 0;
 
-            if (pagesRead > 0) {
+            if (pagesRead > 0 || minutesRead > 0) {
+                checkAndResetRecords(); 
                 const now = new Date();
                 const day = now.getDay();
                 const adjDay = day === 0 ? 6 : day - 1; 
-                readingRecords.week[adjDay] += pagesRead;
+
+                if (pagesRead > 0) {
+                    readingRecords.week[adjDay] += pagesRead;
+                    let weekOfMonth = Math.floor((now.getDate() - 1) / 7);
+                    if (weekOfMonth > 3) weekOfMonth = 3; 
+                    readingRecords.month[weekOfMonth] += pagesRead;
+                    readingRecords.year[now.getMonth()] += pagesRead;
+                }
+
+                if (minutesRead > 0) {
+                    readingTimeRecords.week[adjDay] += minutesRead;
+                    let weekOfMonth = Math.floor((now.getDate() - 1) / 7);
+                    if (weekOfMonth > 3) weekOfMonth = 3; 
+                    readingTimeRecords.month[weekOfMonth] += minutesRead;
+                    readingTimeRecords.year[now.getMonth()] += minutesRead;
+                }
             }
 
             myBooks[currentBookIndex].currentPage = endPage;
@@ -690,6 +790,8 @@
         });
 
         let myChart = null;
+        let myTimeChart = null;
+
         function initChart() {
             const ctx = document.getElementById('readingChart').getContext('2d');
             myChart = new Chart(ctx, {
@@ -697,15 +799,29 @@
                 data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ label: '読んだページ数', data: readingRecords.week, borderColor: '#358869', backgroundColor: 'rgba(53, 136, 105, 0.1)', fill: true, tension: 0.4 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 50 } } }
             });
+
+            const ctxTime = document.getElementById('timeChart').getContext('2d');
+            myTimeChart = new Chart(ctxTime, {
+                type: 'line',
+                data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ label: '読んだ時間(分)', data: readingTimeRecords.week, borderColor: '#E67E22', backgroundColor: 'rgba(230, 126, 34, 0.1)', fill: true, tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 30 } } }
+            });
         }
+
         function updateChart(period, btnElement) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
             const labels = period === 'week' ? ['月','火','水','木','金','土','日'] : period === 'month' ? ['第1週','第2週','第3週','第4週'] : ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+            
             if (myChart) {
                 myChart.data.labels = labels;
                 myChart.data.datasets[0].data = readingRecords[period];
                 myChart.update();
+            }
+            if (myTimeChart) {
+                myTimeChart.data.labels = labels;
+                myTimeChart.data.datasets[0].data = readingTimeRecords[period];
+                myTimeChart.update();
             }
         }
 
