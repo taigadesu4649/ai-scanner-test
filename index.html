@@ -177,6 +177,8 @@
     <div id="scan-result" class="screen">
         <div class="page-header">
             <h2>スキャン結果</h2>
+            <!-- レイアウト維持用の透明ボタン -->
+            <button class="btn btn-primary header-btn" style="visibility: hidden;">＋ 追加</button>
         </div>
         <div class="box" id="scan-status" style="min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold;"></div>
         <div id="scan-results-container" style="margin-bottom: 20px;"></div>
@@ -214,6 +216,8 @@
     <div id="read-list" class="screen">
         <div class="page-header">
             <h2>読了本一覧</h2>
+            <!-- レイアウト維持用の透明ボタン -->
+            <button class="btn btn-primary header-btn" style="visibility: hidden;">＋ 追加</button>
         </div>
         <div class="scroll-box" id="read-bookcase"></div>
         <div class="box">完読ページ数合計: <span id="read-total-pages">0</span></div>
@@ -222,6 +226,8 @@
     <div id="record" class="screen">
         <div class="page-header">
             <h2>読書記録</h2>
+            <!-- レイアウト維持用の透明ボタン -->
+            <button class="btn btn-primary header-btn" style="visibility: hidden;">＋ 追加</button>
         </div>
         <div class="tab-container">
             <button class="tab-btn active" onclick="updateChart('week', this)">1週間</button>
