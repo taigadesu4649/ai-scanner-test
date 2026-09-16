@@ -73,6 +73,40 @@
             text-align: center;
         }
 
+        /* 検索・並び替えコントロール */
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .search-input, .sort-select {
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+        }
+        .search-input:focus, .sort-select:focus {
+            outline: none;
+            border-color: var(--main-green);
+            background: var(--header-bg);
+            box-shadow: 0 2px 8px rgba(53,136,105,0.15);
+        }
+        .sort-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23358869%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 15px top 50%;
+            background-size: 12px auto;
+        }
+
         /* 共通カードデザイン */
         .box, .scroll-box { 
             background: var(--card-bg); padding: 20px; margin-bottom: 20px; 
@@ -164,6 +198,17 @@
         </div>
         <button class="btn btn-primary" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px;" onclick="document.getElementById('cameraInput').click()">＋ 追加</button>
         <div style="clear: both;"></div>
+
+        <!-- コントロール群（絞り込み・並び替え） -->
+        <div class="controls-container">
+            <input type="text" id="search-unread" class="search-input" placeholder="タイトルで絞り込み..." oninput="renderBookshelves()">
+            <select id="sort-unread" class="sort-select" onchange="renderBookshelves()">
+                <option value="newest">追加日が新しい順 (新規順)</option>
+                <option value="oldest">追加日が古い順 (古い順)</option>
+                <option value="title_asc">タイトル順 (あ→ん, A→Z)</option>
+                <option value="title_desc">タイトル逆順 (ん→あ, Z→A)</option>
+            </select>
+        </div>
         
         <div class="scroll-box" id="unread-bookcase"></div>
         <div class="box">読んだ総ページ数: <span id="total-pages">0</span></div>
@@ -217,6 +262,17 @@
         <!-- レイアウト維持用の透明ボタン -->
         <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px; visibility: hidden;">追加</button>
         <div style="clear: both;"></div>
+
+        <!-- コントロール群（絞り込み・並び替え） -->
+        <div class="controls-container">
+            <input type="text" id="search-read" class="search-input" placeholder="タイトルで絞り込み..." oninput="renderBookshelves()">
+            <select id="sort-read" class="sort-select" onchange="renderBookshelves()">
+                <option value="newest">追加日が新しい順 (新規順)</option>
+                <option value="oldest">追加日が古い順 (古い順)</option>
+                <option value="title_asc">タイトル順 (あ→ん, A→Z)</option>
+                <option value="title_desc">タイトル逆順 (ん→あ, Z→A)</option>
+            </select>
+        </div>
         
         <div class="scroll-box" id="read-bookcase"></div>
         <div class="box">完読ページ数合計: <span id="read-total-pages">0</span></div>
@@ -298,29 +354,66 @@
             document.getElementById('side-menu').classList.toggle('open');
         });
 
+        // 絞り込み・並び替えを適用したレンダリング
         function renderBookshelves() {
             const unread = document.getElementById('unread-bookcase');
             const read = document.getElementById('read-bookcase');
             unread.innerHTML = read.innerHTML = '';
+            
             let totalUnread = 0, totalRead = 0;
 
-            myBooks.forEach((book, i) => {
+            // 検索とソートの現在の値を取得
+            const searchUnread = document.getElementById('search-unread') ? document.getElementById('search-unread').value.toLowerCase() : '';
+            const sortUnread = document.getElementById('sort-unread') ? document.getElementById('sort-unread').value : 'newest';
+            
+            const searchRead = document.getElementById('search-read') ? document.getElementById('search-read').value.toLowerCase() : '';
+            const sortRead = document.getElementById('sort-read') ? document.getElementById('sort-read').value : 'newest';
+
+            // 並び替え・絞り込み後も正しい本を選択できるよう、元の配列のインデックスを保持
+            let booksWithIndex = myBooks.map((book, index) => ({ book, originalIndex: index }));
+
+            let unreadList = booksWithIndex.filter(b => !b.book.isRead);
+            let readList = booksWithIndex.filter(b => b.book.isRead);
+
+            // 総ページ数は絞り込み前の全体で計算
+            unreadList.forEach(b => totalUnread += b.book.currentPage);
+            readList.forEach(b => totalRead += b.book.currentPage);
+
+            // 絞り込みフィルターの適用
+            if (searchUnread) unreadList = unreadList.filter(b => b.book.title.toLowerCase().includes(searchUnread));
+            if (searchRead) readList = readList.filter(b => b.book.title.toLowerCase().includes(searchRead));
+
+            // 並び替え処理
+            const sortFn = (order) => (a, b) => {
+                if (order === 'newest') return a.originalIndex - b.originalIndex;
+                if (order === 'oldest') return b.originalIndex - a.originalIndex;
+                if (order === 'title_asc') return a.book.title.localeCompare(b.book.title, 'ja');
+                if (order === 'title_desc') return b.book.title.localeCompare(a.book.title, 'ja');
+                return 0;
+            };
+
+            unreadList.sort(sortFn(sortUnread));
+            readList.sort(sortFn(sortRead));
+
+            // DOMに要素を追加
+            unreadList.forEach(b => {
                 const item = document.createElement('div');
                 item.className = 'book-item';
-                item.innerHTML = `<span>${book.title}</span> <span style="font-size:12px; color:#666;">${book.currentPage}P</span>`;
-                item.onclick = () => openBookDetail(i);
-
-                if (book.isRead) {
-                    read.appendChild(item);
-                    totalRead += book.currentPage;
-                } else {
-                    unread.appendChild(item);
-                    totalUnread += book.currentPage;
-                }
+                item.innerHTML = `<span>${b.book.title}</span> <span style="font-size:12px; color:#666;">${b.book.currentPage}P</span>`;
+                item.onclick = () => openBookDetail(b.originalIndex);
+                unread.appendChild(item);
             });
 
-            if(!unread.innerHTML) unread.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">未読本はありません</div>';
-            if(!read.innerHTML) read.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">完読した本はありません</div>';
+            readList.forEach(b => {
+                const item = document.createElement('div');
+                item.className = 'book-item';
+                item.innerHTML = `<span>${b.book.title}</span> <span style="font-size:12px; color:#666;">${b.book.currentPage}P</span>`;
+                item.onclick = () => openBookDetail(b.originalIndex);
+                read.appendChild(item);
+            });
+
+            if(!unread.innerHTML) unread.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本が見つかりません</div>';
+            if(!read.innerHTML) read.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本が見つかりません</div>';
 
             document.getElementById('total-pages').innerText = totalUnread + totalRead;
             document.getElementById('read-total-pages').innerText = totalRead;
