@@ -7,8 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* デフォルト（ペーパー＆インク） */
-            --bg-color: #F9F6F0;
+            /* 優しい有彩色（ペールミントグリーン）を背景に設定 */
+            --bg-color: #E9F2ED;
             --header-bg: #FFFFFF;
             --card-bg: #FAFAFA;
             --main-green: #358869;
@@ -17,7 +17,7 @@
             --danger-red: #D9534F;
             --text-main: #3E3A39;
             --text-sub: #8D8985;
-            --border-color: #EAE6E1;
+            --border-color: #D3E0D8; /* 背景に合わせて境界線も少し色付きに */
             --base-font-size: 15px;
         }
 
@@ -119,7 +119,7 @@
             background-image: linear-gradient(var(--border-color) 1px, transparent 1px),
             linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
             background-size: 20px 20px;
-            background-color: rgba(249, 246, 240, 0.9); /* 少し透過させて方眼を見せる */
+            background-color: rgba(255, 255, 255, 0.6); /* 背景に馴染ませる */
         }
         
         .hero-title {
@@ -127,19 +127,29 @@
             font-size: calc(var(--base-font-size) + 8px);
             font-weight: bold;
             margin-bottom: 12px;
-            line-height: 1.4;
+            /* 1行で表示 */
+            white-space: nowrap;
+            overflow-x: auto;
+            -ms-overflow-style: none;  /* IE, Edge 対応 */
+            scrollbar-width: none;  /* Firefox 対応 */
         }
+        .hero-title::-webkit-scrollbar { display: none; }
 
         .hero-desc {
             color: var(--text-main);
             font-size: var(--base-font-size);
             margin-bottom: 30px;
-            line-height: 1.6;
+            /* 1行で表示 */
+            white-space: nowrap;
+            overflow-x: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
+        .hero-desc::-webkit-scrollbar { display: none; }
 
         .hero-subtitle {
             font-weight: bold;
-            color: var(--text-main);
+            color: var(--main-green); /* キャッチコピーと同じ色に */
             margin-bottom: 15px;
             font-size: calc(var(--base-font-size) + 2px);
         }
@@ -157,31 +167,31 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.02);
             display: flex;
             flex-direction: column;
-            align-items: center; /* 中央揃えに変更 */
+            align-items: center;
             text-align: center;
         }
         .feature-icon {
-            font-size: 32px; /* 少し大きく */
+            font-size: 32px; 
             margin-bottom: 10px;
         }
         .feature-title {
             font-weight: bold;
             font-size: calc(var(--base-font-size));
-            color: var(--text-main); /* 緑から変更 */
+            color: var(--text-main);
             margin-bottom: 8px;
         }
         .feature-desc {
             font-size: calc(var(--base-font-size) - 2px);
             color: var(--text-sub);
             line-height: 1.4;
-            background-color: var(--bg-color); /* 下部を少し色付け */
+            background-color: var(--bg-color);
             padding: 8px;
             border-radius: 4px;
             width: 100%;
             box-sizing: border-box;
         }
 
-        /* ナビゲーションタイル（新ホーム画面用） */
+        /* ナビゲーションタイル */
         .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .nav-tile {
             background: var(--card-bg); border: 1px solid var(--border-color);
@@ -231,14 +241,10 @@
             <h2 style="color: var(--main-green);">Tumi Yomi</h2>
         </div>
         
-        <!-- 読書メーター風ヒーローセクション -->
+        <!-- ヒーローセクション -->
         <div class="hero-section">
-            <div class="hero-title">積読をなくして、<br>もっと気軽に本を読もう</div>
-            <div class="hero-desc">
-                Tumi Yomiは、カメラで一括スキャンして<br>
-                未読本を管理し、読書時間を記録できる<br>
-                あなたのための読書サポートアプリです。
-            </div>
+            <div class="hero-title">積読をなくして、もっと気軽に本を読もう</div>
+            <div class="hero-desc">Tumi Yomiは、カメラで一括スキャンして未読本を管理し、読書時間を記録できるあなたのための読書サポートアプリです。</div>
             
             <div class="hero-subtitle">Tumi Yomiに登録するとできること</div>
             
@@ -435,13 +441,13 @@
                 document.documentElement.style.setProperty('--text-sub', '#666666');
                 document.documentElement.style.setProperty('--border-color', '#E0E0E0');
             } else {
-                // デフォルト (ペーパー＆インク)
-                document.documentElement.style.setProperty('--bg-color', '#F9F6F0');
+                // デフォルト (ペーパー＆インク) + 優しい有彩色（ペールミント）
+                document.documentElement.style.setProperty('--bg-color', '#E9F2ED');
                 document.documentElement.style.setProperty('--header-bg', '#FFFFFF');
                 document.documentElement.style.setProperty('--card-bg', '#FAFAFA');
                 document.documentElement.style.setProperty('--text-main', '#3E3A39');
                 document.documentElement.style.setProperty('--text-sub', '#8D8985');
-                document.documentElement.style.setProperty('--border-color', '#EAE6E1');
+                document.documentElement.style.setProperty('--border-color', '#D3E0D8');
             }
         }
 
