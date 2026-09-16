@@ -7,18 +7,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* カラーパレット */
-            --bg-color: #F4F7F6;       /* アプリ全体の背景（優しいライトグレー） */
-            --card-bg: #FFFFFF;        /* 要素の背景（白） */
-            --main-green: #3CA586;     /* 読書メーター風の落ち着いたメイングリーン */
-            --accent-orange: #F39C12;  /* アクションを促すオレンジ（追加、開始など） */
-            --sub-blue: #5D9CEC;       /* タブやサブアクションのブルー */
-            --danger-red: #E74C3C;     /* 削除・終了などのレッド */
+            /* カラーパレット：温かみのある「ペーパー＆インク」テーマ */
+            --bg-color: #F9F6F0;       /* 背景：温かみのある紙のようなアイボリー */
+            --card-bg: #FFFFFF;        /* 要素の背景：白（背景との差で立体感を出す） */
+            --main-green: #358869;     /* メイン：少し深みのあるクラシックなブックグリーン */
+            --accent-orange: #E67E22;  /* アクセント：落ち着いたテラコッタオレンジ */
+            --sub-blue: #4A90E2;       /* サブ：爽やかなインクブルー */
+            --danger-red: #D9534F;     /* 警告：目に優しいマイルドなレッド */
             
             /* テキストカラー */
-            --text-main: #2C3E50;      /* 濃いブルーグレー（真っ黒を避ける） */
-            --text-sub: #7F8C8D;       /* 補足情報のグレー */
-            --border-color: #E6EAEA;   /* 優しい区切り線 */
+            --text-main: #3E3A39;      /* 文字：活版印刷のようなスミ黒（完全な黒を避ける） */
+            --text-sub: #8D8985;       /* 補足：温かみのあるグレー */
+            --border-color: #EAE6E1;   /* 境界線：背景に馴染む薄いベージュ */
         }
 
         body { 
@@ -38,7 +38,7 @@
             background: var(--card-bg); border: 1px solid var(--border-color); 
             z-index: 1000; cursor: pointer; color: var(--main-green); 
             line-height: 1; padding: 8px 12px; border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
         }
         #side-menu { 
             position: fixed; top: 0; right: -250px; width: 220px; height: 100%; 
@@ -56,7 +56,7 @@
         /* 共通カードデザイン */
         .box, .scroll-box { 
             background: var(--card-bg); padding: 20px; margin-bottom: 20px; 
-            border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
             border: 1px solid var(--border-color);
         }
         .box { text-align: center; }
@@ -67,7 +67,7 @@
             display: block; width: 100%; padding: 14px; margin-bottom: 12px; 
             border: none; font-weight: bold; border-radius: 8px; cursor: pointer; 
             font-size: 15px; transition: opacity 0.2s, transform 0.1s;
-            background: #E8ECEF; color: var(--text-main); /* デフォルトボタン */
+            background: #EBE8E3; color: var(--text-main); /* デフォルトボタン */
         }
         .btn:active { transform: scale(0.98); }
         .btn-primary { background: var(--main-green); color: white; }
@@ -76,13 +76,13 @@
         .btn-danger { background: var(--danger-red); color: white; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        h1, h2 { text-align: center; font-size: 22px; margin-top: 0; color: var(--text-main); margin-bottom: 24px; }
+        h1, h2 { text-align: center; font-size: 22px; margin-top: 0; color: var(--text-main); margin-bottom: 24px; letter-spacing: 0.5px; }
 
         /* タブ（読書記録グラフ上部） */
         .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .tab-btn { 
             padding: 8px 20px; border: 1px solid var(--border-color); 
-            background: var(--card-bg); color: var(--text-sub);
+            background: var(--bg-color); color: var(--text-sub);
             border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 13px;
             transition: all 0.2s;
         }
@@ -99,6 +99,7 @@
         .book-item span:last-child { 
             font-size: 13px !important; color: var(--text-sub) !important; 
             background: var(--bg-color); padding: 4px 10px; border-radius: 12px; 
+            border: 1px solid var(--border-color);
         } /* ページ数バッジ */
 
         /* スキャン結果画面 */
@@ -110,21 +111,22 @@
         }
         .scan-result-input:focus { outline: none; border-color: var(--main-green); background: var(--card-bg); }
         .delete-row-btn { 
-            background: #FFECEC; color: var(--danger-red); border: 1px solid #FFD6D6; 
+            background: #FDF0F0; color: var(--danger-red); border: 1px solid #F9DADA; 
             padding: 10px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; 
         }
 
         /* 入力・スライダー */
         input[type=number] {
             padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;
-            color: var(--text-main); text-align: center;
+            color: var(--text-main); text-align: center; background: var(--bg-color);
         }
-        input[type=number]:focus { outline: none; border-color: var(--main-green); }
+        input[type=number]:focus { outline: none; border-color: var(--main-green); background: var(--card-bg); }
         input[type=range] { width: 100%; margin: 20px 0; accent-color: var(--main-green); }
         #countdownDisplay { 
             font-size: 36px; font-weight: bold; color: var(--text-main); 
             font-family: 'Courier New', Courier, monospace; margin-left: 15px; 
             background: var(--bg-color); padding: 8px 16px; border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
     </style>
 </head>
@@ -281,8 +283,8 @@
                 }
             });
 
-            if(!unread.innerHTML) unread.innerHTML = '<div style="color:#999;text-align:center;padding:20px;">未読本はありません</div>';
-            if(!read.innerHTML) read.innerHTML = '<div style="color:#999;text-align:center;padding:20px;">完読した本はありません</div>';
+            if(!unread.innerHTML) unread.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">未読本はありません</div>';
+            if(!read.innerHTML) read.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">完読した本はありません</div>';
 
             document.getElementById('total-pages').innerText = totalUnread + totalRead;
             document.getElementById('read-total-pages').innerText = totalRead;
@@ -440,7 +442,7 @@
             const ctx = document.getElementById('readingChart').getContext('2d');
             myChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ label: '読んだページ数', data: readingRecords.week, borderColor: '#3CA586', backgroundColor: 'rgba(60, 165, 134, 0.1)', fill: true, tension: 0.3 }] },
+                data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ label: '読んだページ数', data: readingRecords.week, borderColor: '#358869', backgroundColor: 'rgba(53, 136, 105, 0.1)', fill: true, tension: 0.3 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 50 } } }
             });
         }
