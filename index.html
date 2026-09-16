@@ -80,7 +80,7 @@
             font-size: 22px;
         }
 
-        /* ★ページヘッダー（常に画面上部に完全に固定して追尾） */
+        /* ページヘッダー（常に画面上部に完全に固定して追尾） */
         .page-header {
             position: fixed;
             top: 0;
@@ -125,7 +125,7 @@
         }
         .menu-item:hover { background-color: var(--bg-color); color: var(--main-green); }
 
-        /* 検索・並び替えコントロール（ピル型デザイン） */
+        /* 検索・並び替えコントロール */
         .controls-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
         .custom-input, .custom-select {
             width: 100%; padding: 14px 20px; font-size: var(--base-font-size); color: var(--text-main);
@@ -174,28 +174,34 @@
             background-color: rgba(249, 246, 240, 0.85); 
         }
         
+        /* ★スマホ（画面幅768px未満）とPCで折り返しを分けるメディアクエリ */
         .hero-title {
             color: var(--main-green);
             font-size: calc(var(--base-font-size) + 8px);
             font-weight: bold;
             margin-bottom: 12px;
-            white-space: nowrap;
-            overflow-x: auto;
-            -ms-overflow-style: none; 
-            scrollbar-width: none; 
+            line-height: 1.4;
         }
-        .hero-title::-webkit-scrollbar { display: none; }
-
         .hero-desc {
             color: var(--text-main);
             font-size: var(--base-font-size);
             margin-bottom: 30px;
-            white-space: nowrap;
-            overflow-x: auto;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            line-height: 1.6;
         }
-        .hero-desc::-webkit-scrollbar { display: none; }
+        
+        /* デフォルトはスマホ向け（自動で折り返す） */
+        .hero-title, .hero-desc {
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        /* 画面幅が広い（768px以上＝PC等）場合は1行（nowrap）にする */
+        @media (min-width: 768px) {
+            .hero-title, .hero-desc {
+                white-space: nowrap;
+                overflow-x: hidden;
+            }
+        }
 
         .hero-subtitle {
             font-weight: bold;
@@ -209,6 +215,14 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
+        
+        /* スマホ向けにカードも1列にするなら以下を追加（現状は2列） */
+        @media (max-width: 480px) {
+            .feature-grid {
+                grid-template-columns: 1fr; /* スマホなら縦1列で大きく見せるのもアリです */
+            }
+        }
+
         .feature-card {
             background: var(--header-bg); 
             border: 1px solid var(--border-color);
