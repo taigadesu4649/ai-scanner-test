@@ -21,6 +21,16 @@
             --base-font-size: 15px;
         }
 
+        /* 横スクロールを完全に防ぐための設定 */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
         body { 
             font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; 
             margin: 0; 
@@ -69,28 +79,7 @@
             font-size: 22px;
         }
 
-        /* ヘッダー・メニュー回り */
-        #menu-btn { 
-            position: fixed; top: 15px; right: 15px; font-size: 24px; 
-            background: var(--card-bg); border: 1px solid var(--border-color); 
-            z-index: 1000; cursor: pointer; color: var(--main-green); 
-            line-height: 1; padding: 8px 12px; border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
-        }
-        #side-menu { 
-            position: fixed; top: 0; right: -250px; width: 220px; height: 100%; 
-            background: var(--card-bg); box-shadow: -2px 0 10px rgba(0,0,0,0.08); 
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999; padding-top: 70px; 
-        }
-        #side-menu.open { right: 0; }
-        .menu-item { 
-            display: block; padding: 16px 24px; text-decoration: none; 
-            color: var(--text-main); border-bottom: 1px solid var(--border-color); 
-            font-weight: bold; transition: background 0.2s;
-        }
-        .menu-item:hover { background-color: var(--bg-color); color: var(--main-green); }
-
-        /* ★ページヘッダー（スクロールに追従するようstickyに変更） */
+        /* ★ページヘッダー（スクロールに追従するようstickyに） */
         .page-header {
             position: sticky;
             top: 0;
@@ -118,7 +107,7 @@
             width: 100%; padding: 14px 20px; font-size: var(--base-font-size); color: var(--text-main);
             border: 1px solid var(--border-color); border-radius: 50px; /* カプセル型に */
             background: var(--header-bg); /* 白抜きにしてスッキリ */
-            box-sizing: border-box; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.2s;
         }
         .custom-input:focus, .custom-select:focus { outline: none; border-color: var(--main-green); box-shadow: 0 4px 12px rgba(53,136,105,0.1); }
 
@@ -225,7 +214,6 @@
             padding: 10px;
             border-radius: 10px;
             width: 100%;
-            box-sizing: border-box;
         }
 
         /* 本のリスト */
@@ -457,7 +445,8 @@
             <button class="tab-btn" onclick="updateChart('month', this)">1ヶ月</button>
             <button class="tab-btn" onclick="updateChart('year', this)">1年</button>
         </div>
-        <div class="box" style="position: relative; height: 40vh; width: 100%;">
+        <!-- グラフの高さを30vhに調整し、内側の余白も調整 -->
+        <div class="box" style="position: relative; height: 30vh; width: 100%; padding: 15px;">
             <canvas id="readingChart"></canvas>
         </div>
     </div>
