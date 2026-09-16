@@ -53,6 +53,32 @@
         }
         .menu-item:hover { background-color: var(--bg-color); color: var(--main-green); }
 
+        /* 統一されたページヘッダー（レイアウト崩れ防止） */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 24px;
+            height: 36px;
+        }
+        .page-header h2 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+        }
+        .header-btn {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+            width: auto;
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
         /* 共通カードデザイン */
         .box, .scroll-box { 
             background: var(--card-bg); padding: 20px; margin-bottom: 20px; 
@@ -75,8 +101,6 @@
         .btn-success { background: var(--sub-blue); color: white; }
         .btn-danger { background: var(--danger-red); color: white; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        h1, h2 { text-align: center; font-size: 22px; margin-top: 0; color: var(--text-main); margin-bottom: 24px; letter-spacing: 0.5px; }
 
         /* タブ（読書記録グラフ上部） */
         .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
@@ -141,16 +165,19 @@
     <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
 
     <div id="home" class="screen active">
-        <h2>読書管理アプリ</h2>
-        <button class="btn btn-primary" style="width: auto; float: right; padding: 8px 20px;" onclick="document.getElementById('cameraInput').click()">追加</button>
-        <div style="clear: both; margin-bottom: 10px;"></div>
+        <div class="page-header">
+            <h2>未読本一覧</h2>
+            <button class="btn btn-primary header-btn" onclick="document.getElementById('cameraInput').click()">＋ 追加</button>
+        </div>
         
         <div class="scroll-box" id="unread-bookcase"></div>
         <div class="box">読んだ総ページ数: <span id="total-pages">0</span></div>
     </div>
 
     <div id="scan-result" class="screen">
-        <h2>スキャン結果</h2>
+        <div class="page-header">
+            <h2>スキャン結果</h2>
+        </div>
         <div class="box" id="scan-status" style="min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold;"></div>
         <div id="scan-results-container" style="margin-bottom: 20px;"></div>
         <button class="btn btn-warning" onclick="document.getElementById('cameraInput').click()">スキャンのやり直し</button>
@@ -185,13 +212,17 @@
     </div>
 
     <div id="read-list" class="screen">
-        <h2>読了本一覧</h2>
+        <div class="page-header">
+            <h2>読了本一覧</h2>
+        </div>
         <div class="scroll-box" id="read-bookcase"></div>
         <div class="box">完読ページ数合計: <span id="read-total-pages">0</span></div>
     </div>
 
     <div id="record" class="screen">
-        <h2>読書記録</h2>
+        <div class="page-header">
+            <h2>読書記録</h2>
+        </div>
         <div class="tab-container">
             <button class="tab-btn active" onclick="updateChart('week', this)">1週間</button>
             <button class="tab-btn" onclick="updateChart('month', this)">1ヶ月</button>
@@ -215,7 +246,6 @@
         let startPageRecord = 0;
         let activeTimer = null;
 
-        // グラフの定期リセットロジック
         function getMondayZero(date) {
             const d = new Date(date);
             const day = d.getDay();
@@ -241,7 +271,6 @@
             localStorage.setItem('lastRecordDate', now.toISOString());
         }
 
-        // アプリ起動時にリセットチェックを実行
         checkAndResetRecords();
 
         function saveBooks() {
@@ -306,7 +335,6 @@
             document.getElementById('reading-section').style.display = 'none';
             document.getElementById('page-input-label').innerText = "現在のページ数を入力してください";
             
-            // スライダーとタイマーUIの初期化
             document.getElementById('timerSlider').style.display = 'block';
             document.getElementById('timerSlider').value = 30;
             updateCountdownUI(30 * 60);
@@ -333,7 +361,7 @@
 
             document.getElementById('setup-section').style.display = 'none';
             document.getElementById('reading-section').style.display = 'block';
-            document.getElementById('timerSlider').style.display = 'none'; // スライダーを非表示
+            document.getElementById('timerSlider').style.display = 'none'; 
 
             let remainingSeconds = parseInt(timerVal) * 60;
             updateCountdownUI(remainingSeconds);
@@ -343,7 +371,6 @@
                 if (remainingSeconds <= 0) {
                     clearInterval(activeTimer);
                     updateCountdownUI(0);
-                    // ※次回のステップでここにサウンド再生を追加します
                 } else {
                     updateCountdownUI(remainingSeconds);
                 }
@@ -361,7 +388,7 @@
             const pagesRead = endPage - startPageRecord;
 
             if (pagesRead > 0) {
-                checkAndResetRecords(); // 保存前に日時またぎチェックを実行
+                checkAndResetRecords(); 
 
                 const now = new Date();
                 const day = now.getDay();
