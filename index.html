@@ -28,7 +28,7 @@
             background-color: var(--bg-color); 
             color: var(--text-main); 
             font-size: var(--base-font-size);
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s, color 0.3s, font-size 0.3s;
         }
 
         .screen { display: none; padding: 20px; padding-top: 10px; } 
@@ -154,7 +154,9 @@
 
     <!-- 新しいホーム画面 -->
     <div id="home" class="screen active">
-        <div class="page-header"><h2>ホーム</h2></div>
+        <div class="page-header">
+            <h2 style="color: var(--main-green);">Tumi Yomi</h2>
+        </div>
         
         <div class="comic-placeholder">
             ここにアプリの使い方がわかる<br>4コマ漫画を配置します
@@ -206,16 +208,30 @@
         <div class="box" style="text-align: left;">
             <p style="margin-top:0; font-weight:bold;">文字の大きさ</p>
             <select id="setting-fontsize" class="custom-select" onchange="saveSettings()">
-                <option value="13px">小さめ</option>
-                <option value="15px">標準</option>
-                <option value="18px">大きめ</option>
+                <option value="15px">15px</option>
+                <option value="20px">20px</option>
+                <option value="25px">25px</option>
+                <option value="30px">30px</option>
+                <option value="35px">35px</option>
+                <option value="40px">40px</option>
+                <option value="45px">45px</option>
+                <option value="50px">50px</option>
+                <option value="55px">55px</option>
+                <option value="60px">60px</option>
+                <option value="65px">65px</option>
+                <option value="70px">70px</option>
+                <option value="75px">75px</option>
+                <option value="80px">80px</option>
+                <option value="85px">85px</option>
+                <option value="90px">90px</option>
+                <option value="95px">95px</option>
+                <option value="100px">100px</option>
             </select>
         </div>
 
         <button class="btn btn-primary" onclick="nav('home')">設定を完了してホームへ</button>
     </div>
 
-    <!-- 以下は既存の画面（スキャン結果、読書中、読了本、記録など）を省略せず記載 -->
     <!-- スキャン結果画面 -->
     <div id="scan-result" class="screen">
         <div class="page-header"><h2>スキャン結果</h2></div>
