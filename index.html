@@ -54,16 +54,19 @@
         }
         .menu-item:hover { background-color: var(--bg-color); color: var(--main-green); }
 
-        /* 統一されたページヘッダー（元の配置のまま背景だけ白枠にする） */
+        /* 統一されたページヘッダー（真っ白な背景、中央揃え） */
         .page-header {
-            margin: -10px -20px 24px -20px;
+            margin: -10px -20px 20px -20px;
             padding: 20px;
             background-color: var(--header-bg);
             box-shadow: 0 2px 8px rgba(0,0,0,0.03);
             border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .page-header h2 {
-            margin: 0 0 15px 0; /* タイトルの下に余白 */
+            margin: 0;
             font-size: 20px;
             letter-spacing: 0.5px;
             color: var(--text-main);
@@ -158,9 +161,9 @@
     <div id="home" class="screen active">
         <div class="page-header">
             <h2>未読本一覧</h2>
-            <button class="btn btn-primary" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 0;" onclick="document.getElementById('cameraInput').click()">＋ 追加</button>
-            <div style="clear: both;"></div>
         </div>
+        <button class="btn btn-primary" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px;" onclick="document.getElementById('cameraInput').click()">＋ 追加</button>
+        <div style="clear: both;"></div>
         
         <div class="scroll-box" id="unread-bookcase"></div>
         <div class="box">読んだ総ページ数: <span id="total-pages">0</span></div>
@@ -169,10 +172,11 @@
     <div id="scan-result" class="screen">
         <div class="page-header">
             <h2>スキャン結果</h2>
-            <!-- レイアウト維持用の透明ボタン -->
-            <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 0; visibility: hidden;">追加</button>
-            <div style="clear: both;"></div>
         </div>
+        <!-- レイアウト維持用の透明ボタン -->
+        <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px; visibility: hidden;">追加</button>
+        <div style="clear: both;"></div>
+        
         <div class="box" id="scan-status" style="min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold;"></div>
         <div id="scan-results-container" style="margin-bottom: 20px;"></div>
         <button class="btn btn-warning" onclick="document.getElementById('cameraInput').click()">スキャンのやり直し</button>
@@ -209,10 +213,11 @@
     <div id="read-list" class="screen">
         <div class="page-header">
             <h2>読了本一覧</h2>
-            <!-- レイアウト維持用の透明ボタン -->
-            <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 0; visibility: hidden;">追加</button>
-            <div style="clear: both;"></div>
         </div>
+        <!-- レイアウト維持用の透明ボタン -->
+        <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px; visibility: hidden;">追加</button>
+        <div style="clear: both;"></div>
+        
         <div class="scroll-box" id="read-bookcase"></div>
         <div class="box">完読ページ数合計: <span id="read-total-pages">0</span></div>
     </div>
@@ -220,10 +225,11 @@
     <div id="record" class="screen">
         <div class="page-header">
             <h2>読書記録</h2>
-            <!-- レイアウト維持用の透明ボタン -->
-            <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 0; visibility: hidden;">追加</button>
-            <div style="clear: both;"></div>
         </div>
+        <!-- レイアウト維持用の透明ボタン -->
+        <button class="btn" style="width: auto; float: right; padding: 8px 20px; margin-bottom: 15px; visibility: hidden;">追加</button>
+        <div style="clear: both;"></div>
+        
         <div class="tab-container">
             <button class="tab-btn active" onclick="updateChart('week', this)">1週間</button>
             <button class="tab-btn" onclick="updateChart('month', this)">1ヶ月</button>
