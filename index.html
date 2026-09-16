@@ -7,17 +7,17 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* 優しい有彩色（ペールミントグリーン）を背景に設定 */
+            /* 優しい有彩色（ペールミントグリーン）とミルク色のベース */
             --bg-color: #E9F2ED;
             --header-bg: #FFFFFF;
-            --card-bg: #FAFAFA;
+            --card-bg: #F9F6F0;
             --main-green: #358869;
             --accent-orange: #E67E22;
             --sub-blue: #4A90E2;
             --danger-red: #D9534F;
             --text-main: #3E3A39;
             --text-sub: #8D8985;
-            --border-color: #D3E0D8; /* 背景に合わせて境界線も少し色付きに */
+            --border-color: #D3E0D8;
             --base-font-size: 15px;
         }
 
@@ -29,42 +29,57 @@
             color: var(--text-main); 
             font-size: var(--base-font-size);
             transition: background-color 0.3s, color 0.3s, font-size 0.3s;
+            /* ボトムナビゲーション用の余白 */
+            padding-bottom: 90px;
         }
 
         .screen { display: none; padding: 20px; padding-top: 10px; } 
         .screen.active { display: block; }
 
-        /* ヘッダー・メニュー回り */
-        #menu-btn { 
-            position: fixed; top: 15px; right: 15px; font-size: 24px; 
-            background: var(--card-bg); border: 1px solid var(--border-color); 
-            z-index: 1000; cursor: pointer; color: var(--main-green); 
-            line-height: 1; padding: 8px 12px; border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        /* ボトムナビゲーション（動画のようなネイティブアプリ風） */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--header-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 25px 0; /* iPhoneのホームバー考慮の余白 */
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
+            border-top: 1px solid var(--border-color);
+            z-index: 1000;
         }
-        #side-menu { 
-            position: fixed; top: 0; right: -250px; width: 220px; height: 100%; 
-            background: var(--card-bg); box-shadow: -2px 0 10px rgba(0,0,0,0.08); 
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999; padding-top: 70px; 
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-sub);
+            font-size: 11px;
+            font-weight: bold;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        #side-menu.open { right: 0; }
-        .menu-item { 
-            display: block; padding: 16px 24px; text-decoration: none; 
-            color: var(--text-main); border-bottom: 1px solid var(--border-color); 
-            font-weight: bold; transition: background 0.2s;
+        .bottom-nav-item.active {
+            color: var(--main-green);
         }
-        .menu-item:hover { background-color: var(--bg-color); color: var(--main-green); }
+        .bottom-nav-icon {
+            font-size: 22px;
+        }
 
         /* ページヘッダー */
         .page-header {
             margin: -10px -20px 20px -20px;
             padding: 20px;
             background-color: var(--header-bg);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 0 0 24px 24px; /* 下部を少し丸く */
         }
         .page-header h2 {
             margin: 0;
@@ -74,52 +89,53 @@
             text-align: center;
         }
 
-        /* 検索・並び替え・設定のコントロール */
-        .controls-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        /* 検索・並び替えコントロール（ピル型デザイン） */
+        .controls-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
         .custom-input, .custom-select {
-            width: 100%; padding: 14px; font-size: var(--base-font-size); color: var(--text-main);
-            border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg);
-            box-sizing: border-box; transition: all 0.2s;
+            width: 100%; padding: 14px 20px; font-size: var(--base-font-size); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 50px; /* カプセル型に */
+            background: var(--header-bg); /* 白抜きにしてスッキリ */
+            box-sizing: border-box; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.2s;
         }
-        .custom-input:focus, .custom-select:focus { outline: none; border-color: var(--main-green); }
+        .custom-input:focus, .custom-select:focus { outline: none; border-color: var(--main-green); box-shadow: 0 4px 12px rgba(53,136,105,0.1); }
 
-        /* 共通カードデザイン */
+        /* 共通カードデザイン（動画のように丸みを強調） */
         .box, .scroll-box { 
-            background: var(--card-bg); padding: 20px; margin-bottom: 20px; 
-            border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+            background: var(--card-bg); padding: 24px; margin-bottom: 20px; 
+            border-radius: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); 
             border: 1px solid var(--border-color);
         }
         .box { text-align: center; }
-        .scroll-box { height: 320px; overflow-y: auto; text-align: left; padding: 10px 20px; }
+        .scroll-box { height: 350px; overflow-y: auto; text-align: left; padding: 15px 24px; }
 
         /* ボタンデザイン */
         .btn { 
-            display: block; width: 100%; padding: 14px; margin-bottom: 12px; 
-            border: none; font-weight: bold; border-radius: 8px; cursor: pointer; 
-            font-size: var(--base-font-size); transition: opacity 0.2s, transform 0.1s;
+            display: block; width: 100%; padding: 16px; margin-bottom: 15px; 
+            border: none; font-weight: bold; border-radius: 16px; cursor: pointer; 
+            font-size: calc(var(--base-font-size) + 1px); transition: opacity 0.2s, transform 0.1s;
             background: #EBE8E3; color: var(--text-main); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: var(--main-green); color: white; }
-        .btn-warning { background: var(--accent-orange); color: white; }
-        .btn-success { background: var(--sub-blue); color: white; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--main-green); color: white; box-shadow: 0 6px 15px rgba(53,136,105,0.25); }
+        .btn-warning { background: var(--accent-orange); color: white; box-shadow: 0 6px 15px rgba(230,126,34,0.25); }
+        .btn-success { background: var(--sub-blue); color: white; box-shadow: 0 6px 15px rgba(74,144,226,0.25); }
         .btn-danger { background: var(--danger-red); color: white; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
-        /* ホーム画面：機能紹介カード（4コマ代わり） */
+        /* ホーム画面：ヒーローセクション */
         .hero-section {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 24px;
             padding: 30px 20px;
             margin-bottom: 24px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            /* 参考画像のような薄い緑の方眼紙風背景を追加 */
+            box-shadow: 0 6px 20px rgba(0,0,0,0.03);
             background-image: linear-gradient(var(--border-color) 1px, transparent 1px),
             linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
             background-size: 20px 20px;
-            background-color: rgba(255, 255, 255, 0.6); /* 背景に馴染ませる */
+            background-color: rgba(249, 246, 240, 0.85); 
         }
         
         .hero-title {
@@ -127,11 +143,10 @@
             font-size: calc(var(--base-font-size) + 8px);
             font-weight: bold;
             margin-bottom: 12px;
-            /* 1行で表示 */
             white-space: nowrap;
             overflow-x: auto;
-            -ms-overflow-style: none;  /* IE, Edge 対応 */
-            scrollbar-width: none;  /* Firefox 対応 */
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
         }
         .hero-title::-webkit-scrollbar { display: none; }
 
@@ -139,7 +154,6 @@
             color: var(--text-main);
             font-size: var(--base-font-size);
             margin-bottom: 30px;
-            /* 1行で表示 */
             white-space: nowrap;
             overflow-x: auto;
             -ms-overflow-style: none;
@@ -149,8 +163,8 @@
 
         .hero-subtitle {
             font-weight: bold;
-            color: var(--main-green); /* キャッチコピーと同じ色に */
-            margin-bottom: 15px;
+            color: var(--main-green); 
+            margin-bottom: 18px;
             font-size: calc(var(--base-font-size) + 2px);
         }
 
@@ -160,19 +174,19 @@
             gap: 15px;
         }
         .feature-card {
-            background: var(--header-bg);
+            background: var(--header-bg); 
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            border-radius: 16px;
+            padding: 18px 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
         }
         .feature-icon {
-            font-size: 32px; 
-            margin-bottom: 10px;
+            font-size: 36px; 
+            margin-bottom: 12px;
         }
         .feature-title {
             font-weight: bold;
@@ -181,58 +195,94 @@
             margin-bottom: 8px;
         }
         .feature-desc {
-            font-size: calc(var(--base-font-size) - 2px);
+            font-size: calc(var(--base-font-size) - 3px);
             color: var(--text-sub);
-            line-height: 1.4;
-            background-color: var(--bg-color);
-            padding: 8px;
-            border-radius: 4px;
+            line-height: 1.5;
+            background-color: var(--bg-color); 
+            padding: 10px;
+            border-radius: 10px;
             width: 100%;
             box-sizing: border-box;
         }
 
-        /* ナビゲーションタイル */
-        .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .nav-tile {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 20px 10px; text-align: center;
-            font-weight: bold; color: var(--text-main); cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        .nav-tile:active {
-            transform: scale(0.98);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
         /* 本のリスト */
         .book-item { 
-            padding: 16px 0; border-bottom: 1px solid var(--border-color); 
+            padding: 18px 0; border-bottom: 1px solid var(--border-color); 
             font-weight: bold; cursor: pointer; display: flex; 
             justify-content: space-between; align-items: center; color: var(--text-main);
         }
         .book-item:last-child { border-bottom: none; }
+        .book-item span:last-child { 
+            font-size: 13px !important; color: var(--main-green) !important; 
+            background: var(--bg-color); padding: 6px 12px; border-radius: 20px; 
+            border: 1px solid var(--border-color);
+        } 
         
-        /* グラフ回り */
-        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        /* グラフ回り（タブもピル型に） */
+        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
         .tab-btn { 
-            padding: 8px 20px; border: 1px solid var(--border-color); 
-            background: var(--bg-color); color: var(--text-sub);
-            border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 13px;
+            padding: 10px 24px; border: 1px solid var(--border-color); 
+            background: var(--header-bg); color: var(--text-sub);
+            border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 13px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            transition: all 0.2s;
         }
-        .tab-btn.active { background: var(--sub-blue); color: white; border-color: var(--sub-blue); }
+        .tab-btn.active { background: var(--main-green); color: white; border-color: var(--main-green); box-shadow: 0 4px 10px rgba(53,136,105,0.2); }
+
+        /* スキャン結果画面 */
+        .scan-result-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+        .scan-result-input { 
+            flex-grow: 1; padding: 14px; font-size: 15px; color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 12px; 
+            background: var(--header-bg);
+        }
+        .delete-row-btn { 
+            background: #FDF0F0; color: var(--danger-red); border: 1px solid #F9DADA; 
+            padding: 14px 18px; border-radius: 12px; font-weight: bold; cursor: pointer; 
+        }
+
+        /* タイマー画面表示 */
+        #countdownDisplay { 
+            font-size: 48px; font-weight: bold; color: var(--main-green); 
+            font-family: 'Helvetica Neue', Arial, sans-serif; margin-left: 0; 
+            background: var(--header-bg); padding: 20px 30px; border-radius: 24px;
+            border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            display: block; text-align: center; margin-bottom: 20px;
+        }
+        input[type=range] { width: 100%; margin: 20px 0; accent-color: var(--main-green); }
+        input[type=number] {
+            padding: 16px; border: 1px solid var(--border-color); border-radius: 16px;
+            color: var(--text-main); text-align: center; background: var(--header-bg);
+        }
+        input[type=number]:focus { outline: none; border-color: var(--main-green); }
     </style>
 </head>
 <body>
 
-    <button id="menu-btn">☰</button>
-    <div id="side-menu">
-        <a href="#" class="menu-item" onclick="nav('home')">ホーム</a>
-        <a href="#" class="menu-item" onclick="nav('unread')">未読本一覧</a>
-        <a href="#" class="menu-item" onclick="nav('read-list')">読了本一覧</a>
-        <a href="#" class="menu-item" onclick="nav('record')">読書記録</a>
-        <a href="#" class="menu-item" onclick="nav('settings')">設定</a>
+    <!-- ボトムナビゲーション -->
+    <div class="bottom-nav">
+        <div class="bottom-nav-item active" onclick="nav('home')">
+            <span class="bottom-nav-icon">🏠</span>
+            <span>ホーム</span>
+        </div>
+        <div class="bottom-nav-item" onclick="nav('unread')">
+            <span class="bottom-nav-icon">📖</span>
+            <span>未読本</span>
+        </div>
+        <div class="bottom-nav-item" onclick="nav('read-list')">
+            <span class="bottom-nav-icon">📚</span>
+            <span>読了本</span>
+        </div>
+        <div class="bottom-nav-item" onclick="nav('record')">
+            <span class="bottom-nav-icon">📊</span>
+            <span>記録</span>
+        </div>
+        <div class="bottom-nav-item" onclick="nav('settings')">
+            <span class="bottom-nav-icon">⚙️</span>
+            <span>設定</span>
+        </div>
     </div>
+
     <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;">
 
     <!-- 新しいホーム画面 -->
@@ -241,7 +291,6 @@
             <h2 style="color: var(--main-green);">Tumi Yomi</h2>
         </div>
         
-        <!-- ヒーローセクション -->
         <div class="hero-section">
             <div class="hero-title">積読をなくして、もっと気軽に本を読もう</div>
             <div class="hero-desc">Tumi Yomiは、カメラで一括スキャンして未読本を管理し、読書時間を記録できるあなたのための読書サポートアプリです。</div>
@@ -272,18 +321,9 @@
             </div>
         </div>
 
-        <!-- 特大スキャンボタン -->
-        <button class="btn btn-primary" style="font-size: calc(var(--base-font-size) + 4px); padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(53,136,105,0.3);" onclick="document.getElementById('cameraInput').click()">
+        <button class="btn btn-primary" style="font-size: calc(var(--base-font-size) + 4px); padding: 20px; margin-bottom: 24px;" onclick="document.getElementById('cameraInput').click()">
             📸 本をスキャンして追加
         </button>
-
-        <!-- ページ遷移のナビゲーションタイル -->
-        <div class="nav-grid">
-            <div class="nav-tile" onclick="nav('unread')">📖 未読本一覧</div>
-            <div class="nav-tile" onclick="nav('read-list')">📚 読了本一覧</div>
-            <div class="nav-tile" onclick="nav('record')">📊 読書記録</div>
-            <div class="nav-tile" onclick="nav('settings')">⚙️ 設定変更</div>
-        </div>
     </div>
 
     <!-- 未読本一覧画面 -->
@@ -309,7 +349,7 @@
         <div class="page-header"><h2>設定変更</h2></div>
         
         <div class="box" style="text-align: left;">
-            <p style="margin-top:0; font-weight:bold;">テーマカラー</p>
+            <p style="margin-top:0; font-weight:bold; color:var(--main-green);">🎨 テーマカラー</p>
             <select id="setting-theme" class="custom-select" onchange="saveSettings()">
                 <option value="paper">ペーパー＆インク (デフォルト)</option>
                 <option value="light">クリアホワイト (明るめ)</option>
@@ -318,7 +358,7 @@
         </div>
 
         <div class="box" style="text-align: left;">
-            <p style="margin-top:0; font-weight:bold;">文字の大きさ</p>
+            <p style="margin-top:0; font-weight:bold; color:var(--main-green);">🔤 文字の大きさ</p>
             <select id="setting-fontsize" class="custom-select" onchange="saveSettings()">
                 <option value="15px">15px</option>
                 <option value="20px">20px</option>
@@ -340,39 +380,39 @@
                 <option value="100px">100px</option>
             </select>
         </div>
-
-        <button class="btn btn-primary" onclick="nav('home')">設定を完了してホームへ</button>
     </div>
 
     <!-- スキャン結果画面 -->
     <div id="scan-result" class="screen">
         <div class="page-header"><h2>スキャン結果</h2></div>
         <div class="box" id="scan-status" style="min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold;"></div>
-        <div id="scan-results-container" style="margin-bottom: 20px;"></div>
-        <button class="btn btn-warning" onclick="document.getElementById('cameraInput').click()">やり直し</button>
-        <button class="btn btn-primary" id="addBookBtn" disabled>追加する</button>
+        <div id="scan-results-container" style="margin-bottom: 24px;"></div>
+        <button class="btn btn-primary" id="addBookBtn" disabled>本棚に追加する</button>
+        <button class="btn btn-warning" onclick="document.getElementById('cameraInput').click()">もう一度スキャンする</button>
         <button class="btn" onclick="nav('home')">キャンセル</button>
     </div>
 
+    <!-- 読書・タイマー画面 -->
     <div id="book-detail" class="screen">
-        <div class="box" id="detail-title" style="font-size: 18px; font-weight: bold;"></div>
-        <p style="font-size: 12px; text-align: center; margin-bottom: 5px;" id="page-input-label">現在のページ数を入力</p>
-        <input type="number" class="box" id="current-page-input" placeholder="0" style="width: 80%; display:block; margin: 0 auto 20px;">
+        <div class="page-header"><h2 id="detail-title"></h2></div>
+        <p style="font-size: 13px; text-align: center; margin-bottom: 8px; font-weight:bold; color:var(--text-sub);" id="page-input-label">現在のページ数を入力してください</p>
+        <input type="number" class="box" id="current-page-input" placeholder="0" style="width: 80%; display:block; margin: 0 auto 24px; font-size: 20px; font-weight:bold;">
+        
         <div class="box">
-            <div style="font-weight: bold; margin-bottom: 10px;">タイマー: <span id="countdownDisplay">30:00</span></div>
+            <span id="countdownDisplay">30:00</span>
             <input type="range" id="timerSlider" min="1" max="120" value="30" oninput="updateCountdownUI(this.value * 60)">
         </div>
         <div id="setup-section">
-            <button class="btn btn-primary" onclick="startReading()">読書開始</button>
-            <button class="btn btn-warning" onclick="markAsRead()">完読</button>
-            <button class="btn btn-danger" onclick="deleteCurrentBook()">削除</button>
+            <button class="btn btn-primary" onclick="startReading()">▶ 読書開始</button>
+            <button class="btn btn-warning" onclick="markAsRead()">🎉 完読にする</button>
+            <button class="btn btn-danger" onclick="deleteCurrentBook()">🗑️ 削除する</button>
         </div>
         <div id="reading-section" style="display: none;">
-            <button class="btn btn-success" onclick="finishReading()">読書終了</button>
+            <button class="btn btn-success" onclick="finishReading()">⏹ 読書終了</button>
         </div>
-        <button class="btn" onclick="nav('unread')">戻る</button>
     </div>
 
+    <!-- 読了本一覧画面 -->
     <div id="read-list" class="screen">
         <div class="page-header"><h2>読了本一覧</h2></div>
         <div class="controls-container">
@@ -386,6 +426,7 @@
         <div class="box">完読ページ数合計: <span id="read-total-pages">0</span></div>
     </div>
 
+    <!-- 読書記録画面 -->
     <div id="record" class="screen">
         <div class="page-header"><h2>読書記録</h2></div>
         <div class="tab-container">
@@ -407,7 +448,6 @@
         };
         let currentBookIndex = -1, startPageRecord = 0, activeTimer = null;
 
-        // 設定の読み込みと適用
         function loadSettings() {
             const savedTheme = localStorage.getItem('appTheme') || 'paper';
             const savedSize = localStorage.getItem('appFontSize') || '15px';
@@ -441,10 +481,9 @@
                 document.documentElement.style.setProperty('--text-sub', '#666666');
                 document.documentElement.style.setProperty('--border-color', '#E0E0E0');
             } else {
-                // デフォルト (ペーパー＆インク) + 優しい有彩色（ペールミント）
                 document.documentElement.style.setProperty('--bg-color', '#E9F2ED');
                 document.documentElement.style.setProperty('--header-bg', '#FFFFFF');
-                document.documentElement.style.setProperty('--card-bg', '#FAFAFA');
+                document.documentElement.style.setProperty('--card-bg', '#F9F6F0');
                 document.documentElement.style.setProperty('--text-main', '#3E3A39');
                 document.documentElement.style.setProperty('--text-sub', '#8D8985');
                 document.documentElement.style.setProperty('--border-color', '#D3E0D8');
@@ -454,14 +493,18 @@
         function nav(targetId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(targetId).classList.add('active');
-            document.getElementById('side-menu').classList.remove('open');
             window.scrollTo(0, 0);
+            
+            // ボトムナビゲーションのアクティブ状態を更新
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.remove('active');
+                if(item.getAttribute('onclick').includes(targetId)) {
+                    item.classList.add('active');
+                }
+            });
+
             if(targetId === 'record' && !myChart) initChart();
         }
-
-        document.getElementById('menu-btn').addEventListener('click', () => {
-            document.getElementById('side-menu').classList.toggle('open');
-        });
 
         function saveBooks() {
             localStorage.setItem('myBooks', JSON.stringify(myBooks));
@@ -510,8 +553,8 @@
                 read.appendChild(item);
             });
 
-            if(!unread.innerHTML) unread.innerHTML = '<div style="color:var(--text-sub);text-align:center;">本がありません</div>';
-            if(!read.innerHTML) read.innerHTML = '<div style="color:var(--text-sub);text-align:center;">本がありません</div>';
+            if(!unread.innerHTML) unread.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本がありません</div>';
+            if(!read.innerHTML) read.innerHTML = '<div style="color:var(--text-sub);text-align:center;padding:20px;">本がありません</div>';
 
             document.getElementById('total-pages').innerText = totalUnread;
             document.getElementById('read-total-pages').innerText = totalRead;
@@ -532,6 +575,7 @@
             document.getElementById('reading-section').style.display = 'none';
             document.getElementById('timerSlider').style.display = 'block';
             document.getElementById('timerSlider').value = 30;
+            document.getElementById('page-input-label').innerText = "現在のページ数を入力してください";
             updateCountdownUI(30 * 60);
             nav('book-detail');
         }
@@ -546,6 +590,7 @@
             document.getElementById('setup-section').style.display = 'none';
             document.getElementById('reading-section').style.display = 'block';
             document.getElementById('timerSlider').style.display = 'none'; 
+            document.getElementById('page-input-label').innerText = "読書終了後のページ数を入力してください";
 
             let remainingSeconds = parseInt(timerVal) * 60;
             updateCountdownUI(remainingSeconds);
@@ -637,7 +682,7 @@
             const ctx = document.getElementById('readingChart').getContext('2d');
             myChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ label: '読んだページ数', data: readingRecords.week, borderColor: '#358869', backgroundColor: 'rgba(53, 136, 105, 0.1)', fill: true, tension: 0.3 }] },
+                data: { labels: ['月','火','水','木','金','土','日'], datasets: [{ label: '読んだページ数', data: readingRecords.week, borderColor: '#358869', backgroundColor: 'rgba(53, 136, 105, 0.1)', fill: true, tension: 0.4 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 50 } } }
             });
         }
