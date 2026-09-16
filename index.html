@@ -107,36 +107,78 @@
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* ホーム画面：機能紹介カード（4コマ代わり） */
+        .hero-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            /* 参考画像のような薄い緑の方眼紙風背景を追加 */
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-color: rgba(249, 246, 240, 0.9); /* 少し透過させて方眼を見せる */
+        }
+        
+        .hero-title {
+            color: var(--main-green);
+            font-size: calc(var(--base-font-size) + 8px);
+            font-weight: bold;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .hero-desc {
+            color: var(--text-main);
+            font-size: var(--base-font-size);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .hero-subtitle {
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-size: calc(var(--base-font-size) + 2px);
+        }
+
         .feature-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-bottom: 24px;
         }
         .feature-card {
-            background: var(--card-bg);
+            background: var(--header-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center; /* 中央揃えに変更 */
+            text-align: center;
         }
         .feature-icon {
-            font-size: 28px;
-            margin-bottom: 8px;
+            font-size: 32px; /* 少し大きく */
+            margin-bottom: 10px;
         }
         .feature-title {
             font-weight: bold;
-            font-size: calc(var(--base-font-size) + 1px);
-            color: var(--main-green);
-            margin-bottom: 6px;
+            font-size: calc(var(--base-font-size));
+            color: var(--text-main); /* 緑から変更 */
+            margin-bottom: 8px;
         }
         .feature-desc {
-            font-size: calc(var(--base-font-size) - 3px);
+            font-size: calc(var(--base-font-size) - 2px);
             color: var(--text-sub);
             line-height: 1.4;
+            background-color: var(--bg-color); /* 下部を少し色付け */
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* ナビゲーションタイル（新ホーム画面用） */
@@ -189,27 +231,38 @@
             <h2 style="color: var(--main-green);">Tumi Yomi</h2>
         </div>
         
-        <!-- 絵文字を使った機能紹介カード（4コマの代わり） -->
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">📸</div>
-                <div class="feature-title">一括スキャン</div>
-                <div class="feature-desc">積んだ本をカメラで撮るだけ。複数冊を自動でリストに追加します。</div>
+        <!-- 読書メーター風ヒーローセクション -->
+        <div class="hero-section">
+            <div class="hero-title">積読をなくして、<br>もっと気軽に本を読もう</div>
+            <div class="hero-desc">
+                Tumi Yomiは、カメラで一括スキャンして<br>
+                未読本を管理し、読書時間を記録できる<br>
+                あなたのための読書サポートアプリです。
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">📚</div>
-                <div class="feature-title">本棚を整理</div>
-                <div class="feature-desc">「未読」と「読了」を分けて管理。今の自分の読書状況がひと目でわかります。</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⏱️</div>
-                <div class="feature-title">集中タイマー</div>
-                <div class="feature-desc">時間を決めて読書スタート。スキマ時間を使って無理なく読み進められます。</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📈</div>
-                <div class="feature-title">記録を可視化</div>
-                <div class="feature-desc">読んだページ数が自動でグラフに。日々の成長を実感してモチベアップ。</div>
+            
+            <div class="hero-subtitle">Tumi Yomiに登録するとできること</div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📸</div>
+                    <div class="feature-title">一括スキャン</div>
+                    <div class="feature-desc">カメラで背表紙を撮るだけ。複数冊を自動で追加。</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <div class="feature-title">本棚を整理</div>
+                    <div class="feature-desc">「未読」と「読了」を分けて、今の状況を把握。</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <div class="feature-title">集中タイマー</div>
+                    <div class="feature-desc">時間を決めて読書開始。スキマ時間で無理なく。</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <div class="feature-title">記録を可視化</div>
+                    <div class="feature-desc">読んだページ数がグラフに。日々の成長を実感。</div>
+                </div>
             </div>
         </div>
 
