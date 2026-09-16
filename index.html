@@ -69,8 +69,32 @@
             font-size: 22px;
         }
 
-        /* ページヘッダー */
+        /* ヘッダー・メニュー回り */
+        #menu-btn { 
+            position: fixed; top: 15px; right: 15px; font-size: 24px; 
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            z-index: 1000; cursor: pointer; color: var(--main-green); 
+            line-height: 1; padding: 8px 12px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        }
+        #side-menu { 
+            position: fixed; top: 0; right: -250px; width: 220px; height: 100%; 
+            background: var(--card-bg); box-shadow: -2px 0 10px rgba(0,0,0,0.08); 
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999; padding-top: 70px; 
+        }
+        #side-menu.open { right: 0; }
+        .menu-item { 
+            display: block; padding: 16px 24px; text-decoration: none; 
+            color: var(--text-main); border-bottom: 1px solid var(--border-color); 
+            font-weight: bold; transition: background 0.2s;
+        }
+        .menu-item:hover { background-color: var(--bg-color); color: var(--main-green); }
+
+        /* ★ページヘッダー（スクロールに追従するようstickyに変更） */
         .page-header {
+            position: sticky;
+            top: 0;
+            z-index: 900;
             margin: -10px -20px 20px -20px;
             padding: 20px;
             background-color: var(--header-bg);
@@ -79,7 +103,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 0 0 24px 24px; /* 下部を少し丸く */
         }
         .page-header h2 {
             margin: 0;
