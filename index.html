@@ -518,8 +518,8 @@
     </div>
 
     <script>
-        // 指定されたAPIキーを統一セット（317行目）
-        const GEMINI_API_KEY = 'AQ.Ab8RN6KH6wr_XlAwsRNRWdCoWCwP23ZKeDVLFvEyf57v_F9grQ';
+        // APIキーを設定（317行目）
+        const GEMINI_API_KEY = 'AQ.Ab8RN6Iu88LXY1Txc6RwG3uLwyeeRkSVEbK07JOjZH0uT0Jybw';
         
         let myBooks = JSON.parse(localStorage.getItem('myBooks')) || [];
         
@@ -828,7 +828,8 @@
                 const reader = new FileReader();
                 const base64 = await new Promise(r => { reader.onload = () => r(reader.result.split(',')[1]); reader.readAsDataURL(file); });
 
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`, {
+                // 安定版の gemini-2.5-flash を指定
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [
@@ -838,6 +839,15 @@
                 });
 
                 const data = await res.json();
+
+                // APIからエラーが返ってきた場合は具体的な理由を表示
+                if (data.error) {
+                    throw new Error(`APIエラー(${data.error.code}): ${data.error.message}`);
+                }
+                if (!data.candidates || !data.candidates[0]) {
+                    throw new Error("画像から文字を読み取れませんでした。");
+                }
+
                 const titles = data.candidates[0].content.parts[0].text.trim().split('\n').map(t => t.replace(/^[-*・]\s*/, '').trim()).filter(t => t);
                 
                 statusEl.innerHTML = `<span style="color:var(--sub-blue);">${titles.length}冊検出しました。編集・削除が可能です。</span>`;
